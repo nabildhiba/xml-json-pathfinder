@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { FileCode, Search, Code, AlignLeft, Copy } from "lucide-react";
+import { FileCode, Search, Code, AlignLeft, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 const CodeEditor = () => {
@@ -10,6 +11,7 @@ const CodeEditor = () => {
   const [jsonContent, setJsonContent] = useState('');
   const [selectedPath, setSelectedPath] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [foundPaths, setFoundPaths] = useState<string[]>([]);
 
   const formatXML = () => {
     try {
@@ -39,7 +41,9 @@ const CodeEditor = () => {
 
   const encodeBase64 = (content: string) => {
     try {
-      return btoa(content);
+      const encoded = btoa(unescape(encodeURIComponent(content)));
+      toast.success("Content encoded to Base64!");
+      return encoded;
     } catch (error) {
       toast.error("Error encoding content!");
       return content;
@@ -48,9 +52,11 @@ const CodeEditor = () => {
 
   const decodeBase64 = (content: string) => {
     try {
-      return atob(content);
+      const decoded = decodeURIComponent(escape(atob(content)));
+      toast.success("Content decoded from Base64!");
+      return decoded;
     } catch (error) {
-      toast.error("Error decoding content!");
+      toast.error("Error decoding content: Invalid Base64 string");
       return content;
     }
   };
@@ -61,7 +67,6 @@ const CodeEditor = () => {
     } else {
       setJsonContent(encodeBase64(jsonContent));
     }
-    toast.success("Content encoded to Base64!");
   };
 
   const handleDecode = (type: 'xml' | 'json') => {
@@ -70,11 +75,117 @@ const CodeEditor = () => {
     } else {
       setJsonContent(decodeBase64(jsonContent));
     }
-    toast.success("Content decoded from Base64!");
+  };
+
+  const findPaths = (obj: any, currentPath: string = '', paths: string[] = []): string[] => {
+    if (typeof obj !== 'object' || obj === null) {
+      paths.push(currentPath);
+      return paths;
+    }
+
+    if (Array.isArray(obj)) {
+      obj.forEach((item, index) => {
+        findPaths(item, `${currentPath}[${index}]`, paths);
+      });
+    } else {
+      Object.keys(obj).forEach(key => {
+        const newPath = currentPath ? `${currentPath}.${key}` : key;
+        findPaths(obj[key], newPath, paths);
+      });
+    }
+
+    return paths;
+  };
+
+  const handleSearch = (type: 'xml' | 'json') => {
+    try {
+      if (type === 'json') {
+        const parsed = JSON.parse(jsonContent);
+        const paths = findPaths(parsed);
+        const filtered = paths.filter(path => 
+          path.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFoundPaths(filtered);
+        if (filtered.length === 0) {
+          toast.info("No matching paths found");
+        }
+      } else {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+        const paths = [];
+        const walkDOM = (node: Node, path: string = '') => {
+          if (node.nodeType === 1) { // Element node
+            const currentPath = path ? `${path}/${node.nodeName}` : node.nodeName;
+            paths.push(currentPath);
+            for (const child of node.childNodes) {
+              walkDOM(child, currentPath);
+            }
+          }
+        };
+        walkDOM(xmlDoc.documentElement);
+        const filtered = paths.filter(path => 
+          path.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFoundPaths(filtered);
+        if (filtered.length === 0) {
+          toast.info("No matching paths found");
+        }
+      }
+    } catch (error) {
+      toast.error("Error searching paths");
+    }
+  };
+
+  const handleTextSelect = (e: React.MouseEvent<HTMLTextAreaElement>, type: 'xml' | 'json') => {
+    const textarea = e.currentTarget;
+    const selectedText = textarea.value.substring(
+      textarea.selectionStart,
+      textarea.selectionEnd
+    );
+
+    if (selectedText) {
+      try {
+        if (type === 'json') {
+          const parsed = JSON.parse(jsonContent);
+          const paths = findPaths(parsed);
+          const matchingPath = paths.find(path => 
+            JSON.stringify(eval(`parsed.${path}`)) === selectedText.trim()
+          );
+          if (matchingPath) {
+            setSelectedPath(matchingPath);
+            toast.success("Path found for selection!");
+          }
+        } else {
+          // For XML, we'll try to find the closest element path
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+          const xpath = `//*[contains(text(),'${selectedText.trim()}')]`;
+          const result = xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+          if (result.singleNodeValue) {
+            let path = '';
+            let node = result.singleNodeValue as Element;
+            while (node && node !== xmlDoc.documentElement) {
+              path = '/' + node.nodeName + path;
+              node = node.parentElement!;
+            }
+            path = '/' + xmlDoc.documentElement.nodeName + path;
+            setSelectedPath(path);
+            toast.success("Path found for selection!");
+          }
+        }
+      } catch (error) {
+        console.error('Error finding path:', error);
+      }
+    }
   };
 
   return (
-    <div className="container py-8 animate-fade-in">
+    <div className="container py-4 animate-fade-in">
+      {/* Ad Space */}
+      <div className="w-full h-24 bg-gray-100 rounded-lg mb-8 flex items-center justify-center">
+        <p className="text-gray-500">Advertisement Space</p>
+      </div>
+
       <h1 className="text-3xl font-bold text-center mb-8">Code Editor & Formatter</h1>
       
       <Tabs defaultValue="xml" className="w-full">
@@ -100,7 +211,7 @@ const CodeEditor = () => {
               Encode Base64
             </Button>
             <Button onClick={() => handleDecode('xml')} variant="outline" className="flex items-center gap-2">
-              <Copy className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4" />
               Decode Base64
             </Button>
           </div>
@@ -110,6 +221,7 @@ const CodeEditor = () => {
               <Textarea
                 value={xmlContent}
                 onChange={(e) => setXmlContent(e.target.value)}
+                onMouseUp={(e) => handleTextSelect(e, 'xml')}
                 className="font-mono min-h-[400px] bg-editor-bg"
                 placeholder="Paste your XML here..."
               />
@@ -123,15 +235,35 @@ const CodeEditor = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => handleSearch('xml')}
+                >
                   <Search className="w-4 h-4" />
                   Search
                 </Button>
               </div>
               <div className="p-4 border rounded-md bg-editor-bg">
                 <h3 className="font-medium mb-2">Selected Path:</h3>
-                <code className="text-sm">{selectedPath || 'No path selected'}</code>
+                <code className="text-sm break-all">{selectedPath || 'No path selected'}</code>
               </div>
+              {foundPaths.length > 0 && (
+                <div className="p-4 border rounded-md bg-editor-bg">
+                  <h3 className="font-medium mb-2">Search Results:</h3>
+                  <div className="max-h-48 overflow-y-auto">
+                    {foundPaths.map((path, index) => (
+                      <div 
+                        key={index}
+                        className="text-sm py-1 cursor-pointer hover:text-blue-600"
+                        onClick={() => setSelectedPath(path)}
+                      >
+                        <code>{path}</code>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>
@@ -147,7 +279,7 @@ const CodeEditor = () => {
               Encode Base64
             </Button>
             <Button onClick={() => handleDecode('json')} variant="outline" className="flex items-center gap-2">
-              <Copy className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4" />
               Decode Base64
             </Button>
           </div>
@@ -157,6 +289,7 @@ const CodeEditor = () => {
               <Textarea
                 value={jsonContent}
                 onChange={(e) => setJsonContent(e.target.value)}
+                onMouseUp={(e) => handleTextSelect(e, 'json')}
                 className="font-mono min-h-[400px] bg-editor-bg"
                 placeholder="Paste your JSON here..."
               />
@@ -170,15 +303,35 @@ const CodeEditor = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  onClick={() => handleSearch('json')}
+                >
                   <Search className="w-4 h-4" />
                   Search
                 </Button>
               </div>
               <div className="p-4 border rounded-md bg-editor-bg">
                 <h3 className="font-medium mb-2">Selected Path:</h3>
-                <code className="text-sm">{selectedPath || 'No path selected'}</code>
+                <code className="text-sm break-all">{selectedPath || 'No path selected'}</code>
               </div>
+              {foundPaths.length > 0 && (
+                <div className="p-4 border rounded-md bg-editor-bg">
+                  <h3 className="font-medium mb-2">Search Results:</h3>
+                  <div className="max-h-48 overflow-y-auto">
+                    {foundPaths.map((path, index) => (
+                      <div 
+                        key={index}
+                        className="text-sm py-1 cursor-pointer hover:text-blue-600"
+                        onClick={() => setSelectedPath(path)}
+                      >
+                        <code>{path}</code>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </TabsContent>
