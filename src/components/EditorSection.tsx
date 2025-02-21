@@ -66,7 +66,7 @@ const EditorSection = ({
           onChange={(e) => onContentChange(e.target.value)}
           onMouseUp={onTextSelect}
           className="font-mono min-h-[400px] bg-editor-bg"
-          placeholder="Paste or upload your content here..."
+          placeholder="Paste or upload your content here. Formatting will occur in this area."
         />
       </div>
       <div className="space-y-2">

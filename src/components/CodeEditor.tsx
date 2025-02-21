@@ -6,10 +6,10 @@ import { FileCode, Code, AlignLeft, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import EditorSection from './EditorSection';
 import PathExtractionSection from './PathExtractionSection';
-import { 
-  formatXMLContent, 
-  formatJSONContent, 
-  encodeToBase64, 
+import {
+  formatXMLContent,
+  formatJSONContent,
+  encodeToBase64,
   decodeFromBase64,
   findJSONPaths,
   findXMLPaths
@@ -31,7 +31,7 @@ const CodeEditor = () => {
     try {
       const formatted = formatXMLContent(xmlContent);
       setXmlContent(formatted);
-      toast.success("XML formatted successfully!");
+      toast.success("XML formatted successfully in-place!");
     } catch (error) {
       toast.error("Invalid XML content!");
     }
@@ -41,7 +41,7 @@ const CodeEditor = () => {
     try {
       const formatted = formatJSONContent(jsonContent);
       setJsonContent(formatted);
-      toast.success("JSON formatted successfully!");
+      toast.success("JSON formatted successfully in-place!");
     } catch (error) {
       toast.error("Invalid JSON content!");
     }
@@ -77,6 +77,30 @@ const CodeEditor = () => {
     }
   };
 
+  const downloadFile = (content, filename) => {
+    const blob = new Blob([content], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const encodeAndDownload = (content, filename) => {
+    const encoded = encodeToBase64(content);
+    downloadFile(encoded, `${filename}.base64`);
+  };
+
+  const decodeAndDownload = (content, filename) => {
+    try {
+      const decoded = decodeFromBase64(content);
+      downloadFile(decoded, filename);
+    } catch (error) {
+      toast.error('Invalid Base64 string for decoding.');
+    }
+  };
+
   const handleTextSelect = (e: React.MouseEvent<HTMLTextAreaElement>, type: 'xml' | 'json') => {
     const textarea = e.currentTarget;
     const selected = textarea.value.substring(
@@ -103,16 +127,16 @@ const CodeEditor = () => {
       } else {
         paths = findXMLPaths(xmlContent);
       }
-      
+
       const searchLower = searchQuery.toLowerCase();
-      const filtered = paths.filter(path => 
+      const filtered = paths.filter(path =>
         path.toLowerCase().includes(searchLower) ||
         (type === 'json' && getValue(path, jsonContent)?.toString().toLowerCase().includes(searchLower)) ||
         (type === 'xml' && getXMLValue(path, xmlContent)?.toLowerCase().includes(searchLower))
       );
-      
+
       setFoundPaths(filtered);
-      
+
       if (filtered.length === 0) {
         toast.info("No matching paths found");
       }
@@ -209,7 +233,7 @@ const CodeEditor = () => {
       </div>
 
       <h1 className="text-3xl font-bold text-center mb-8">Code Editor & Formatter</h1>
-      
+
       <Tabs defaultValue="xml" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8">
           <TabsTrigger value="xml" className="flex items-center gap-2">
@@ -224,7 +248,7 @@ const CodeEditor = () => {
 
         <TabsContent value="xml" className="space-y-4">
           <div className="flex gap-2 mb-4">
-            <Button onClick={formatXML} className="flex items-center gap-2">
+            <Button onClick={formatXML} title="Format XML content directly in the editor" className="flex items-center gap-2">
               <AlignLeft className="w-4 h-4" />
               Format XML
             </Button>
@@ -232,9 +256,17 @@ const CodeEditor = () => {
               <Copy className="w-4 h-4" />
               Encode Base64
             </Button>
+            <Button onClick={() => encodeAndDownload(xmlContent, 'xml-content')} className="flex items-center gap-2">
+              <Copy className="w-4 h-4" />
+              Encode and Download XML
+            </Button>
             <Button onClick={() => handleDecode('xml')} variant="outline" className="flex items-center gap-2">
               <RefreshCw className="w-4 h-4" />
               Decode Base64
+            </Button>
+            <Button onClick={() => decodeAndDownload(xmlEncodedContent, 'xml-content-decoded')} className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4" />
+              Decode and Download XML
             </Button>
           </div>
 
@@ -260,7 +292,7 @@ const CodeEditor = () => {
 
         <TabsContent value="json" className="space-y-4">
           <div className="flex gap-2 mb-4">
-            <Button onClick={formatJSON} className="flex items-center gap-2">
+            <Button onClick={formatJSON} title="Format JSON content directly in the editor" className="flex items-center gap-2">
               <AlignLeft className="w-4 h-4" />
               Format JSON
             </Button>
@@ -268,9 +300,18 @@ const CodeEditor = () => {
               <Copy className="w-4 h-4" />
               Encode Base64
             </Button>
+            <Button onClick={() => encodeAndDownload(jsonContent, 'json-content')} className="flex items-center gap-2">
+              <Copy className="w-4 h-4" />
+              Encode and Download JSON
+            </Button>
+
             <Button onClick={() => handleDecode('json')} variant="outline" className="flex items-center gap-2">
               <RefreshCw className="w-4 h-4" />
               Decode Base64
+            </Button>
+            <Button onClick={() => decodeAndDownload(jsonEncodedContent, 'json-content-decoded')} className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4" />
+              Decode and Download JSON
             </Button>
           </div>
 
