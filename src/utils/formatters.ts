@@ -23,23 +23,33 @@ export const decodeFromBase64 = (content: string): string => {
 };
 
 export const findJSONPaths = (obj: any, currentPath: string = '', paths: string[] = []): string[] => {
-  if (typeof obj !== 'object' || obj === null) {
+  if (obj === null) {
     paths.push(currentPath);
     return paths;
   }
 
-  if (Array.isArray(obj)) {
-    obj.forEach((item, index) => {
-      findJSONPaths(item, `${currentPath}[${index}]`, paths);
+  if (typeof obj === 'object') {
+    Object.entries(obj).forEach(([key, value]) => {
+      const newPath = currentPath ? `${currentPath}.${key}` : key;
+      // Add the key path itself
+      paths.push(newPath);
+      
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          findJSONPaths(item, `${newPath}[${index}]`, paths);
+        });
+      } else if (typeof value === 'object' && value !== null) {
+        findJSONPaths(value, newPath, paths);
+      } else {
+        // Add the value path
+        paths.push(newPath);
+      }
     });
   } else {
-    Object.keys(obj).forEach(key => {
-      const newPath = currentPath ? `${currentPath}.${key}` : key;
-      findJSONPaths(obj[key], newPath, paths);
-    });
+    paths.push(currentPath);
   }
 
-  return paths;
+  return [...new Set(paths)]; // Remove duplicates
 };
 
 export const findXMLPaths = (xmlContent: string): string[] => {
@@ -51,6 +61,18 @@ export const findXMLPaths = (xmlContent: string): string[] => {
     if (node.nodeType === 1) { // Element node
       const currentPath = path ? `${path}/${node.nodeName}` : node.nodeName;
       paths.push(currentPath);
+      
+      // Add paths for attributes
+      const element = node as Element;
+      for (const attr of element.attributes) {
+        paths.push(`${currentPath}/@${attr.name}`);
+      }
+      
+      // Add paths for text content
+      if (element.textContent?.trim()) {
+        paths.push(`${currentPath}/text()`);
+      }
+      
       for (const child of node.childNodes) {
         walkDOM(child, currentPath);
       }
@@ -58,5 +80,17 @@ export const findXMLPaths = (xmlContent: string): string[] => {
   };
   
   walkDOM(xmlDoc.documentElement);
-  return paths;
+  return [...new Set(paths)]; // Remove duplicates
+};
+
+export const downloadFile = (content: string, filename: string) => {
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
 };

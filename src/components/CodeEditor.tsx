@@ -104,9 +104,13 @@ const CodeEditor = () => {
         paths = findXMLPaths(xmlContent);
       }
       
+      const searchLower = searchQuery.toLowerCase();
       const filtered = paths.filter(path => 
-        path.toLowerCase().includes(searchQuery.toLowerCase())
+        path.toLowerCase().includes(searchLower) ||
+        (type === 'json' && getValue(path, jsonContent)?.toString().toLowerCase().includes(searchLower)) ||
+        (type === 'xml' && getXMLValue(path, xmlContent)?.toLowerCase().includes(searchLower))
       );
+      
       setFoundPaths(filtered);
       
       if (filtered.length === 0) {
@@ -117,14 +121,60 @@ const CodeEditor = () => {
     }
   };
 
+  const getValue = (path: string, jsonStr: string) => {
+    try {
+      const obj = JSON.parse(jsonStr);
+      return path.split('.').reduce((acc: any, curr) => {
+        if (curr.includes('[')) {
+          const [arrayName, indexStr] = curr.split('[');
+          const index = parseInt(indexStr.replace(']', ''));
+          return acc[arrayName][index];
+        }
+        return acc[curr];
+      }, obj);
+    } catch {
+      return null;
+    }
+  };
+
+  const getXMLValue = (path: string, xmlStr: string) => {
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlStr, "text/xml");
+      if (path.endsWith('text()')) {
+        const element = xmlDoc.evaluate(
+          path.slice(0, -7), // Remove text()
+          xmlDoc,
+          null,
+          XPathResult.FIRST_ORDERED_NODE_TYPE,
+          null
+        ).singleNodeValue;
+        return element?.textContent || '';
+      } else if (path.includes('@')) {
+        const attr = xmlDoc.evaluate(
+          path,
+          xmlDoc,
+          null,
+          XPathResult.STRING_TYPE,
+          null
+        );
+        return attr.stringValue;
+      }
+      return '';
+    } catch {
+      return '';
+    }
+  };
+
   const extractPath = () => {
     try {
       if (currentEditor === 'json') {
         const parsed = JSON.parse(jsonContent);
         const paths = findJSONPaths(parsed);
-        const matchingPath = paths.find(path => 
-          JSON.stringify(eval(`parsed.${path}`)) === selectedText.trim()
-        );
+        const matchingPath = paths.find(path => {
+          const value = getValue(path, jsonContent);
+          return value?.toString() === selectedText.trim() || path.endsWith(selectedText.trim());
+        });
         if (matchingPath) {
           setSelectedPath(matchingPath);
           toast.success("Path extracted successfully!");
@@ -134,17 +184,13 @@ const CodeEditor = () => {
       } else {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
-        const xpath = `//*[contains(text(),'${selectedText.trim()}')]`;
-        const result = xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-        if (result.singleNodeValue) {
-          let path = '';
-          let node = result.singleNodeValue as Element;
-          while (node && node !== xmlDoc.documentElement) {
-            path = '/' + node.nodeName + path;
-            node = node.parentElement!;
-          }
-          path = '/' + xmlDoc.documentElement.nodeName + path;
-          setSelectedPath(path);
+        const paths = findXMLPaths(xmlContent);
+        const matchingPath = paths.find(path => {
+          const value = getXMLValue(path, xmlContent);
+          return value === selectedText.trim() || path.endsWith(selectedText.trim());
+        });
+        if (matchingPath) {
+          setSelectedPath(matchingPath);
           toast.success("Path extracted successfully!");
         } else {
           toast.error("Couldn't find path for selection");
