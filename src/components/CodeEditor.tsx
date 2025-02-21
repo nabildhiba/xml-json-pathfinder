@@ -1,9 +1,19 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { FileCode, Search, Code, AlignLeft, Copy, RefreshCw, ArrowLeft, ArrowRight } from "lucide-react";
+import { FileCode, Code, AlignLeft, Copy, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import EditorSection from './EditorSection';
+import PathExtractionSection from './PathExtractionSection';
+import { 
+  formatXMLContent, 
+  formatJSONContent, 
+  encodeToBase64, 
+  decodeFromBase64,
+  findJSONPaths,
+  findXMLPaths
+} from '@/utils/formatters';
 
 const CodeEditor = () => {
   const [xmlContent, setXmlContent] = useState('');
@@ -19,13 +29,7 @@ const CodeEditor = () => {
 
   const formatXML = () => {
     try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
-      const serializer = new XMLSerializer();
-      const formatted = serializer.serializeToString(xmlDoc)
-        .replace(/>/g, ">\n")
-        .replace(/\n\s*\n/g, "\n")
-        .trim();
+      const formatted = formatXMLContent(xmlContent);
       setXmlContent(formatted);
       toast.success("XML formatted successfully!");
     } catch (error) {
@@ -35,38 +39,18 @@ const CodeEditor = () => {
 
   const formatJSON = () => {
     try {
-      const parsed = JSON.parse(jsonContent);
-      setJsonContent(JSON.stringify(parsed, null, 2));
+      const formatted = formatJSONContent(jsonContent);
+      setJsonContent(formatted);
       toast.success("JSON formatted successfully!");
     } catch (error) {
       toast.error("Invalid JSON content!");
     }
   };
 
-  const findPaths = (obj: any, currentPath: string = '', paths: string[] = []): string[] => {
-    if (typeof obj !== 'object' || obj === null) {
-      paths.push(currentPath);
-      return paths;
-    }
-
-    if (Array.isArray(obj)) {
-      obj.forEach((item, index) => {
-        findPaths(item, `${currentPath}[${index}]`, paths);
-      });
-    } else {
-      Object.keys(obj).forEach(key => {
-        const newPath = currentPath ? `${currentPath}.${key}` : key;
-        findPaths(obj[key], newPath, paths);
-      });
-    }
-
-    return paths;
-  };
-
   const handleEncode = (type: 'xml' | 'json') => {
     try {
       const content = type === 'xml' ? xmlContent : jsonContent;
-      const encoded = btoa(unescape(encodeURIComponent(content)));
+      const encoded = encodeToBase64(content);
       if (type === 'xml') {
         setXmlEncodedContent(encoded);
       } else {
@@ -81,7 +65,7 @@ const CodeEditor = () => {
   const handleDecode = (type: 'xml' | 'json') => {
     try {
       const content = type === 'xml' ? xmlContent : jsonContent;
-      const decoded = decodeURIComponent(escape(atob(content)));
+      const decoded = decodeFromBase64(content);
       if (type === 'xml') {
         setXmlEncodedContent(decoded);
       } else {
@@ -110,11 +94,34 @@ const CodeEditor = () => {
     }
   };
 
+  const handleSearch = (type: 'xml' | 'json') => {
+    try {
+      let paths: string[] = [];
+      if (type === 'json') {
+        const parsed = JSON.parse(jsonContent);
+        paths = findJSONPaths(parsed);
+      } else {
+        paths = findXMLPaths(xmlContent);
+      }
+      
+      const filtered = paths.filter(path => 
+        path.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFoundPaths(filtered);
+      
+      if (filtered.length === 0) {
+        toast.info("No matching paths found");
+      }
+    } catch (error) {
+      toast.error("Error searching paths");
+    }
+  };
+
   const extractPath = () => {
     try {
       if (currentEditor === 'json') {
         const parsed = JSON.parse(jsonContent);
-        const paths = findPaths(parsed);
+        const paths = findJSONPaths(parsed);
         const matchingPath = paths.find(path => 
           JSON.stringify(eval(`parsed.${path}`)) === selectedText.trim()
         );
@@ -186,86 +193,22 @@ const CodeEditor = () => {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Original Content</label>
-                  <ArrowRight className="w-4 h-4 text-gray-400" />
-                </div>
-                <Textarea
-                  value={xmlContent}
-                  onChange={(e) => setXmlContent(e.target.value)}
-                  onMouseUp={(e) => handleTextSelect(e, 'xml')}
-                  className="font-mono min-h-[400px] bg-editor-bg"
-                  placeholder="Paste your XML here..."
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Encoded/Decoded Result</label>
-                  <ArrowLeft className="w-4 h-4 text-gray-400" />
-                </div>
-                <Textarea
-                  value={xmlEncodedContent}
-                  readOnly
-                  className="font-mono min-h-[400px] bg-editor-bg"
-                  placeholder="Encoded/decoded content will appear here..."
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="p-4 border rounded-md bg-gray-50">
-                <h3 className="font-medium mb-2">Path Extraction</h3>
-                <p className="text-sm text-gray-600 mb-4">Select text in the editor to extract its path. The extracted path will appear below.</p>
-                {hasSelection && (
-                  <Button 
-                    onClick={extractPath}
-                    className="w-full mb-2"
-                  >
-                    Extract Path for Selection
-                  </Button>
-                )}
-                <div className="p-3 border rounded bg-white">
-                  <code className="text-sm break-all">{selectedPath || 'No path selected'}</code>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Search paths..."
-                  className="flex-1 px-3 py-2 border rounded-md"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={() => handleSearch('xml')}
-                >
-                  <Search className="w-4 h-4" />
-                  Search
-                </Button>
-              </div>
-
-              {foundPaths.length > 0 && (
-                <div className="p-4 border rounded-md bg-editor-bg">
-                  <h3 className="font-medium mb-2">Search Results:</h3>
-                  <div className="max-h-48 overflow-y-auto">
-                    {foundPaths.map((path, index) => (
-                      <div 
-                        key={index}
-                        className="text-sm py-1 cursor-pointer hover:text-blue-600"
-                        onClick={() => setSelectedPath(path)}
-                      >
-                        <code>{path}</code>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <EditorSection
+              originalContent={xmlContent}
+              encodedContent={xmlEncodedContent}
+              onContentChange={setXmlContent}
+              onTextSelect={(e) => handleTextSelect(e, 'xml')}
+            />
+            <PathExtractionSection
+              hasSelection={hasSelection}
+              selectedPath={selectedPath}
+              searchQuery={searchQuery}
+              onSearchQueryChange={setSearchQuery}
+              onSearch={() => handleSearch('xml')}
+              onExtractPath={extractPath}
+              foundPaths={foundPaths}
+              onPathSelect={setSelectedPath}
+            />
           </div>
         </TabsContent>
 
@@ -286,86 +229,22 @@ const CodeEditor = () => {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Original Content</label>
-                  <ArrowRight className="w-4 h-4 text-gray-400" />
-                </div>
-                <Textarea
-                  value={jsonContent}
-                  onChange={(e) => setJsonContent(e.target.value)}
-                  onMouseUp={(e) => handleTextSelect(e, 'json')}
-                  className="font-mono min-h-[400px] bg-editor-bg"
-                  placeholder="Paste your JSON here..."
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium">Encoded/Decoded Result</label>
-                  <ArrowLeft className="w-4 h-4 text-gray-400" />
-                </div>
-                <Textarea
-                  value={jsonEncodedContent}
-                  readOnly
-                  className="font-mono min-h-[400px] bg-editor-bg"
-                  placeholder="Encoded/decoded content will appear here..."
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="p-4 border rounded-md bg-gray-50">
-                <h3 className="font-medium mb-2">Path Extraction</h3>
-                <p className="text-sm text-gray-600 mb-4">Select text in the editor to extract its path. The extracted path will appear below.</p>
-                {hasSelection && (
-                  <Button 
-                    onClick={extractPath}
-                    className="w-full mb-2"
-                  >
-                    Extract Path for Selection
-                  </Button>
-                )}
-                <div className="p-3 border rounded bg-white">
-                  <code className="text-sm break-all">{selectedPath || 'No path selected'}</code>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Search paths..."
-                  className="flex-1 px-3 py-2 border rounded-md"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={() => handleSearch('json')}
-                >
-                  <Search className="w-4 h-4" />
-                  Search
-                </Button>
-              </div>
-
-              {foundPaths.length > 0 && (
-                <div className="p-4 border rounded-md bg-editor-bg">
-                  <h3 className="font-medium mb-2">Search Results:</h3>
-                  <div className="max-h-48 overflow-y-auto">
-                    {foundPaths.map((path, index) => (
-                      <div 
-                        key={index}
-                        className="text-sm py-1 cursor-pointer hover:text-blue-600"
-                        onClick={() => setSelectedPath(path)}
-                      >
-                        <code>{path}</code>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <EditorSection
+              originalContent={jsonContent}
+              encodedContent={jsonEncodedContent}
+              onContentChange={setJsonContent}
+              onTextSelect={(e) => handleTextSelect(e, 'json')}
+            />
+            <PathExtractionSection
+              hasSelection={hasSelection}
+              selectedPath={selectedPath}
+              searchQuery={searchQuery}
+              onSearchQueryChange={setSearchQuery}
+              onSearch={() => handleSearch('json')}
+              onExtractPath={extractPath}
+              foundPaths={foundPaths}
+              onPathSelect={setSelectedPath}
+            />
           </div>
         </TabsContent>
       </Tabs>
