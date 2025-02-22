@@ -17,9 +17,8 @@ import {
 
 const CodeEditor = () => {
   const [xmlContent, setXmlContent] = useState('');
-  const [xmlEncodedContent, setXmlEncodedContent] = useState('');
   const [jsonContent, setJsonContent] = useState('');
-  const [jsonEncodedContent, setJsonEncodedContent] = useState('');
+  const [encodedContent, setEncodedContent] = useState('');
   const [selectedPath, setSelectedPath] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [foundPaths, setFoundPaths] = useState<string[]>([]);
@@ -51,11 +50,8 @@ const CodeEditor = () => {
     try {
       const content = type === 'xml' ? xmlContent : jsonContent;
       const encoded = encodeToBase64(content);
-      if (type === 'xml') {
-        setXmlEncodedContent(encoded);
-      } else {
-        setJsonEncodedContent(encoded);
-      }
+      setEncodedContent(encoded);
+
       toast.success("Content encoded to Base64!");
     } catch (error) {
       toast.error("Error encoding content!");
@@ -67,7 +63,7 @@ const CodeEditor = () => {
       const content = type === 'xml' ? xmlContent : jsonContent;
       const decoded = decodeFromBase64(content);
       if (type === 'xml') {
-        setXmlEncodedContent(decoded);
+        setEncodedContent(decoded);
       } else {
         setJsonEncodedContent(decoded);
       }
@@ -235,7 +231,7 @@ const CodeEditor = () => {
       <h1 className="text-3xl font-bold text-center mb-8">Code Editor & Formatter</h1>
 
       <Tabs defaultValue="xml" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
+        <TabsList className="grid w-full grid-cols-3 mb-8">  {/* Note the change to grid-cols-3 */}
           <TabsTrigger value="xml" className="flex items-center gap-2">
             <FileCode className="w-4 h-4" />
             XML Editor
@@ -244,14 +240,74 @@ const CodeEditor = () => {
             <Code className="w-4 h-4" />
             JSON Editor
           </TabsTrigger>
+          <TabsTrigger value="encodeDecode" className="flex items-center gap-2"> {/* New Tab */}
+            <RefreshCw className="w-4 h-4" />
+            Encode/Decode
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="xml" className="space-y-4">
+
+          {/* Path Extraction Section */}
+          <PathExtractionSection
+            hasSelection={hasSelection}
+            selectedPath={selectedPath}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            onSearch={() => handleSearch('xml')}
+            onExtractPath={extractPath}
+            foundPaths={foundPaths}
+            onPathSelect={setSelectedPath}
+          />
+
           <div className="flex gap-2 mb-4">
             <Button onClick={formatXML} title="Format XML content directly in the editor" className="flex items-center gap-2">
               <AlignLeft className="w-4 h-4" />
               Format XML
             </Button>
+          </div>
+
+          {/* Editor Section for Input and Result */}
+          <EditorSection
+            originalContent={xmlContent}
+            onContentChange={setXmlContent}
+            showResult={false}  // or a new state
+            onTextSelect={(e) => handleTextSelect(e, 'xml')}
+          />
+        </TabsContent>
+
+        <TabsContent value="json" className="space-y-4">
+          {/* Path Extraction Section */}
+          <PathExtractionSection
+            hasSelection={hasSelection}
+            selectedPath={selectedPath}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            onSearch={() => handleSearch('json')}
+            onExtractPath={extractPath}
+            foundPaths={foundPaths}
+            onPathSelect={setSelectedPath}
+          />
+
+          <div className="flex gap-2 mb-4">
+            <Button onClick={formatJSON} title="Format JSON content directly in the editor" className="flex items-center gap-2">
+              <AlignLeft className="w-4 h-4" />
+              Format JSON
+            </Button>
+          </div>
+
+          {/* Editor Section for Input and Result */}
+          <EditorSection
+            originalContent={jsonContent}
+            onContentChange={setJsonContent}
+            showResult={false}  // or a new state
+            onTextSelect={(e) => handleTextSelect(e, 'json')}
+          />
+        </TabsContent>
+
+
+        <TabsContent value="encodeDecode" className="space-y-4">
+          <div className="flex gap-2">
             <Button onClick={() => handleEncode('xml')} variant="outline" className="flex items-center gap-2">
               <Copy className="w-4 h-4" />
               Encode Base64
@@ -264,76 +320,23 @@ const CodeEditor = () => {
               <RefreshCw className="w-4 h-4" />
               Decode Base64
             </Button>
-            <Button onClick={() => decodeAndDownload(xmlEncodedContent, 'xml-content-decoded')} className="flex items-center gap-2">
+            <Button onClick={() => decodeAndDownload(xmlContent, 'xml-content-decoded')} className="flex items-center gap-2">
               <RefreshCw className="w-4 h-4" />
               Decode and Download XML
             </Button>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex flex-col space-y-4">
+            {/* Assume a generic EditorSection or new component handles encode/decode input */}
             <EditorSection
-              originalContent={xmlContent}
-              encodedContent={xmlEncodedContent}
-              onContentChange={setXmlContent}
-              onTextSelect={(e) => handleTextSelect(e, 'xml')}
-            />
-            <PathExtractionSection
-              hasSelection={hasSelection}
-              selectedPath={selectedPath}
-              searchQuery={searchQuery}
-              onSearchQueryChange={setSearchQuery}
-              onSearch={() => handleSearch('xml')}
-              onExtractPath={extractPath}
-              foundPaths={foundPaths}
-              onPathSelect={setSelectedPath}
+              originalContent={xmlContent}  // or a new state specifically for encode/decode
+              encodedContent={encodedContent}
+              showResult={true}  // or a new state
+              onContentChange={setXmlContent}  // or a new handler
+              onTextSelect={(e) => handleTextSelect(e, 'xml')}  // Adjust as needed
             />
           </div>
         </TabsContent>
 
-        <TabsContent value="json" className="space-y-4">
-          <div className="flex gap-2 mb-4">
-            <Button onClick={formatJSON} title="Format JSON content directly in the editor" className="flex items-center gap-2">
-              <AlignLeft className="w-4 h-4" />
-              Format JSON
-            </Button>
-            <Button onClick={() => handleEncode('json')} variant="outline" className="flex items-center gap-2">
-              <Copy className="w-4 h-4" />
-              Encode Base64
-            </Button>
-            <Button onClick={() => encodeAndDownload(jsonContent, 'json-content')} className="flex items-center gap-2">
-              <Copy className="w-4 h-4" />
-              Encode and Download JSON
-            </Button>
-
-            <Button onClick={() => handleDecode('json')} variant="outline" className="flex items-center gap-2">
-              <RefreshCw className="w-4 h-4" />
-              Decode Base64
-            </Button>
-            <Button onClick={() => decodeAndDownload(jsonEncodedContent, 'json-content-decoded')} className="flex items-center gap-2">
-              <RefreshCw className="w-4 h-4" />
-              Decode and Download JSON
-            </Button>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <EditorSection
-              originalContent={jsonContent}
-              encodedContent={jsonEncodedContent}
-              onContentChange={setJsonContent}
-              onTextSelect={(e) => handleTextSelect(e, 'json')}
-            />
-            <PathExtractionSection
-              hasSelection={hasSelection}
-              selectedPath={selectedPath}
-              searchQuery={searchQuery}
-              onSearchQueryChange={setSearchQuery}
-              onSearch={() => handleSearch('json')}
-              onExtractPath={extractPath}
-              foundPaths={foundPaths}
-              onPathSelect={setSelectedPath}
-            />
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   );

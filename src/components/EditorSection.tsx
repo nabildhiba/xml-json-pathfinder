@@ -8,6 +8,7 @@ import { downloadFile } from '@/utils/formatters';
 interface EditorSectionProps {
   originalContent: string;
   encodedContent: string;
+  showResult: boolean;  // New prop to control result section visibility
   onContentChange: (content: string) => void;
   onTextSelect: (e: React.MouseEvent<HTMLTextAreaElement>) => void;
 }
@@ -15,6 +16,7 @@ interface EditorSectionProps {
 const EditorSection = ({
   originalContent,
   encodedContent,
+  showResult,
   onContentChange,
   onTextSelect
 }: EditorSectionProps) => {
@@ -42,8 +44,8 @@ const EditorSection = ({
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium">Original Content (Format, Encode, or Decode this content)</label>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2"
@@ -69,30 +71,32 @@ const EditorSection = ({
           placeholder="Paste or upload your content here. Formatting will occur in this area."
         />
       </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium">Result (Encoded/Decoded content appears here)</label>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleDownloadResult}
-              className="flex items-center gap-2"
-              disabled={!encodedContent}
-            >
-              <Download className="w-4 h-4" />
-              Download Result
-            </Button>
-            <ArrowLeft className="w-4 h-4 text-gray-400" />
+      {showResult && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm font-medium">Result (Encoded/Decoded content appears here)</label>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadResult}
+                className="flex items-center gap-2"
+                disabled={!encodedContent}
+              >
+                <Download className="w-4 h-4" />
+                Download Result
+              </Button>
+              <ArrowLeft className="w-4 h-4 text-gray-400" />
+            </div>
           </div>
+          <Textarea
+            value={encodedContent}
+            readOnly
+            className="font-mono min-h-[400px] bg-editor-bg"
+            placeholder="After clicking Encode or Decode, the result will appear here..."
+          />
         </div>
-        <Textarea
-          value={encodedContent}
-          readOnly
-          className="font-mono min-h-[400px] bg-editor-bg"
-          placeholder="After clicking Encode or Decode, the result will appear here..."
-        />
-      </div>
+      )}
     </div>
   );
 };
