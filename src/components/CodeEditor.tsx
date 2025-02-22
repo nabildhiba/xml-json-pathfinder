@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { FileCode, Code, AlignLeft, Copy, RefreshCw } from "lucide-react";
@@ -14,6 +14,12 @@ import {
   findXMLPaths
 } from '@/utils/formatters';
 
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
+
 const CodeEditor = () => {
   const [xmlContent, setXmlContent] = useState('');
   const [jsonContent, setJsonContent] = useState('');
@@ -24,6 +30,14 @@ const CodeEditor = () => {
   const [hasSelection, setHasSelection] = useState(false);
   const [selectedText, setSelectedText] = useState('');
   const [currentEditor, setCurrentEditor] = useState<'xml' | 'json'>('xml');
+
+  useEffect(() => {
+    try {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (err) {
+      console.error('AdSense error:', err);
+    }
+  }, []);
 
   const formatXML = () => {
     try {
@@ -223,8 +237,13 @@ const CodeEditor = () => {
   return (
     <div className="container py-4 animate-fade-in">
       {/* Ad Space */}
-      <div className="w-full h-24 bg-gray-100 rounded-lg mb-8 flex items-center justify-center">
-        <p className="text-gray-500">Advertisement Space</p>
+      <div className="w-full mb-8">
+        <ins className="adsbygoogle"
+             style={{ display: 'block' }}
+             data-ad-client="ca-pub-7479735239636417"
+             data-ad-slot="auto"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
       </div>
 
       <h1 className="text-3xl font-bold text-center mb-8">Code Editor & Formatter</h1>
