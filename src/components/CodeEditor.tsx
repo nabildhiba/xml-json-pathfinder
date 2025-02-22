@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -231,23 +230,31 @@ const CodeEditor = () => {
       <h1 className="text-3xl font-bold text-center mb-8">Code Editor & Formatter</h1>
 
       <Tabs defaultValue="xml" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">  {/* Note the change to grid-cols-3 */}
-          <TabsTrigger value="xml" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-100">
+          <TabsTrigger 
+            value="xml" 
+            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          >
             <FileCode className="w-4 h-4" />
             XML Editor
           </TabsTrigger>
-          <TabsTrigger value="json" className="flex items-center gap-2">
+          <TabsTrigger 
+            value="json" 
+            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          >
             <Code className="w-4 h-4" />
             JSON Editor
           </TabsTrigger>
-          <TabsTrigger value="encodeDecode" className="flex items-center gap-2"> {/* New Tab */}
+          <TabsTrigger 
+            value="encodeDecode" 
+            className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          >
             <RefreshCw className="w-4 h-4" />
             Encode/Decode
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="xml" className="space-y-4">
-
           {/* Path Extraction Section */}
           <PathExtractionSection
             hasSelection={hasSelection}
@@ -270,8 +277,8 @@ const CodeEditor = () => {
           {/* Editor Section for Input and Result */}
           <EditorSection
             originalContent={xmlContent}
+            encodedContent={encodedContent}
             onContentChange={setXmlContent}
-            showResult={false}  // or a new state
             onTextSelect={(e) => handleTextSelect(e, 'xml')}
           />
         </TabsContent>
@@ -299,12 +306,11 @@ const CodeEditor = () => {
           {/* Editor Section for Input and Result */}
           <EditorSection
             originalContent={jsonContent}
+            encodedContent={encodedContent}
             onContentChange={setJsonContent}
-            showResult={false}  // or a new state
             onTextSelect={(e) => handleTextSelect(e, 'json')}
           />
         </TabsContent>
-
 
         <TabsContent value="encodeDecode" className="space-y-4">
           <div className="flex gap-2">
@@ -326,17 +332,14 @@ const CodeEditor = () => {
             </Button>
           </div>
           <div className="flex flex-col space-y-4">
-            {/* Assume a generic EditorSection or new component handles encode/decode input */}
             <EditorSection
-              originalContent={xmlContent}  // or a new state specifically for encode/decode
+              originalContent={xmlContent}
               encodedContent={encodedContent}
-              showResult={true}  // or a new state
-              onContentChange={setXmlContent}  // or a new handler
-              onTextSelect={(e) => handleTextSelect(e, 'xml')}  // Adjust as needed
+              onContentChange={setXmlContent}
+              onTextSelect={(e) => handleTextSelect(e, 'xml')}
             />
           </div>
         </TabsContent>
-
       </Tabs>
     </div>
   );
