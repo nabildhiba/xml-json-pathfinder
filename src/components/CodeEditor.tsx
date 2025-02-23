@@ -30,6 +30,7 @@ const CodeEditor = () => {
   const [hasSelection, setHasSelection] = useState(false);
   const [selectedText, setSelectedText] = useState('');
   const [currentEditor, setCurrentEditor] = useState<'xml' | 'json'>('xml');
+  const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
     try {
@@ -75,11 +76,8 @@ const CodeEditor = () => {
     try {
       const content = type === 'xml' ? xmlContent : jsonContent;
       const decoded = decodeFromBase64(content);
-      if (type === 'xml') {
-        setEncodedContent(decoded);
-      } else {
-        setJsonEncodedContent(decoded);
-      }
+      setEncodedContent(decoded);
+      setShowResult(true);
       toast.success("Content decoded from Base64!");
     } catch (error) {
       toast.error("Error decoding content: Invalid Base64 string");
@@ -246,7 +244,10 @@ const CodeEditor = () => {
              data-full-width-responsive="true"></ins>
       </div>
 
-      <h1 className="text-3xl font-bold text-center mb-8">Code Editor & Formatter</h1>
+      <h1 className="text-3xl font-bold text-center mb-4">XML Formatter & JSON Beautifier</h1>
+      <p className="text-center text-gray-600 mb-8">
+        Free online tool to format XML, beautify JSON, encode/decode Base64, and validate code with XPath/JSONPath lookup
+      </p>
 
       <Tabs defaultValue="xml" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-100">
@@ -255,26 +256,25 @@ const CodeEditor = () => {
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <FileCode className="w-4 h-4" />
-            XML Editor
+            XML Formatter & Viewer
           </TabsTrigger>
           <TabsTrigger 
             value="json" 
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <Code className="w-4 h-4" />
-            JSON Editor
+            JSON Beautifier
           </TabsTrigger>
           <TabsTrigger 
             value="encodeDecode" 
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <RefreshCw className="w-4 h-4" />
-            Encode/Decode
+            Base64 Encoder/Decoder
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="xml" className="space-y-4">
-          {/* Path Extraction Section */}
           <PathExtractionSection
             hasSelection={hasSelection}
             selectedPath={selectedPath}
@@ -289,21 +289,20 @@ const CodeEditor = () => {
           <div className="flex gap-2 mb-4">
             <Button onClick={formatXML} title="Format XML content directly in the editor" className="flex items-center gap-2">
               <AlignLeft className="w-4 h-4" />
-              Format XML
+              Format & Validate XML
             </Button>
           </div>
 
-          {/* Editor Section for Input and Result */}
           <EditorSection
             originalContent={xmlContent}
             encodedContent={encodedContent}
+            showResult={showResult}
             onContentChange={setXmlContent}
             onTextSelect={(e) => handleTextSelect(e, 'xml')}
           />
         </TabsContent>
 
         <TabsContent value="json" className="space-y-4">
-          {/* Path Extraction Section */}
           <PathExtractionSection
             hasSelection={hasSelection}
             selectedPath={selectedPath}
@@ -322,7 +321,6 @@ const CodeEditor = () => {
             </Button>
           </div>
 
-          {/* Editor Section for Input and Result */}
           <EditorSection
             originalContent={jsonContent}
             encodedContent={encodedContent}
