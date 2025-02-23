@@ -256,14 +256,14 @@ const CodeEditor = () => {
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <FileCode className="w-4 h-4" />
-            XML Formatter & Viewer
+            XML Formatter & Path Lookup
           </TabsTrigger>
           <TabsTrigger 
             value="json" 
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <Code className="w-4 h-4" />
-            JSON Beautifier
+            JSON Beautifier & Path Finder
           </TabsTrigger>
           <TabsTrigger 
             value="encodeDecode" 
@@ -324,6 +324,7 @@ const CodeEditor = () => {
           <EditorSection
             originalContent={jsonContent}
             encodedContent={encodedContent}
+            showResult={showResult}
             onContentChange={setJsonContent}
             onTextSelect={(e) => handleTextSelect(e, 'json')}
           />
@@ -335,23 +336,16 @@ const CodeEditor = () => {
               <Copy className="w-4 h-4" />
               Encode Base64
             </Button>
-            <Button onClick={() => encodeAndDownload(xmlContent, 'xml-content')} className="flex items-center gap-2">
-              <Copy className="w-4 h-4" />
-              Encode and Download XML
-            </Button>
             <Button onClick={() => handleDecode('xml')} variant="outline" className="flex items-center gap-2">
               <RefreshCw className="w-4 h-4" />
               Decode Base64
-            </Button>
-            <Button onClick={() => decodeAndDownload(xmlContent, 'xml-content-decoded')} className="flex items-center gap-2">
-              <RefreshCw className="w-4 h-4" />
-              Decode and Download XML
             </Button>
           </div>
           <div className="flex flex-col space-y-4">
             <EditorSection
               originalContent={xmlContent}
               encodedContent={encodedContent}
+              showResult={showResult}
               onContentChange={setXmlContent}
               onTextSelect={(e) => handleTextSelect(e, 'xml')}
             />
