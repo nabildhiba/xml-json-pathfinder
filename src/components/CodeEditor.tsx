@@ -245,9 +245,9 @@ const CodeEditor = () => {
              data-full-width-responsive="true"></ins>
       </div>
 
-      <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Formatter & Path Finder</h1>
+      <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Format Converter & Path Finder</h1>
       <p className="text-center text-gray-600 mb-8">
-        Free online tool for XML & JSON formatting, XPath/JSONPath lookup, and Base64 encoding/decoding
+        Free online tool for code formatting, path lookup, and Base64 conversion
       </p>
 
       <Tabs defaultValue="xml" className="w-full">
@@ -257,7 +257,7 @@ const CodeEditor = () => {
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <FileCode className="w-4 h-4" />
-            XML Formatter & Path Lookup
+            XML Beautifier & Path Finder
           </TabsTrigger>
           <TabsTrigger 
             value="json" 
@@ -271,7 +271,7 @@ const CodeEditor = () => {
             className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
           >
             <RefreshCw className="w-4 h-4" />
-            Base64 Encoder/Decoder
+            Base64 Converter
           </TabsTrigger>
         </TabsList>
 
