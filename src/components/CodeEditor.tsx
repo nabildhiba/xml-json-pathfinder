@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -244,9 +245,9 @@ const CodeEditor = () => {
              data-full-width-responsive="true"></ins>
       </div>
 
-      <h1 className="text-3xl font-bold text-center mb-4">XML Formatter & JSON Beautifier</h1>
+      <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Formatter & Path Finder</h1>
       <p className="text-center text-gray-600 mb-8">
-        Free online tool to format XML, beautify JSON, encode/decode Base64, and validate code with XPath/JSONPath lookup
+        Free online tool for XML & JSON formatting, XPath/JSONPath lookup, and Base64 encoding/decoding
       </p>
 
       <Tabs defaultValue="xml" className="w-full">
