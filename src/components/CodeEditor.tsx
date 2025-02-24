@@ -31,7 +31,10 @@ const CodeEditor = () => {
 
   useEffect(() => {
     try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      const pushAd = () => {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      };
+      pushAd();
     } catch (err) {
       console.error('AdSense error:', err);
     }
@@ -152,14 +155,21 @@ const CodeEditor = () => {
 
   return (
     <div className="container py-4 animate-fade-in">
-      {/* Ad Space */}
+      {/* Top AdSense Banner */}
       <div className="w-full mb-8">
-        <ins className="adsbygoogle"
-             style={{ display: 'block' }}
-             data-ad-client="ca-pub-7479735239636417"
-             data-ad-slot="auto"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
+        <ins
+          className="adsbygoogle"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '90px',
+            marginBottom: '1rem'
+          }}
+          data-ad-client="ca-pub-7479735239636417"
+          data-ad-slot="2793865476"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
       </div>
 
       <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
