@@ -166,7 +166,7 @@ const CodeEditor = () => {
             marginBottom: '1rem'
           }}
           data-ad-client="ca-pub-7479735239636417"
-          data-ad-slot="2793865476"
+          data-ad-slot="2770178735"
           data-ad-format="auto"
           data-full-width-responsive="true"
         />
