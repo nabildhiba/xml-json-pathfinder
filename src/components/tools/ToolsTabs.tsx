@@ -117,7 +117,7 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
         <Base64Tab
           content={xmlContent}
           encodedContent={encodedContent}
-          showResult={showResult}
+          showResult={true}
           onEncode={() => onEncode('xml')}
           onDecode={() => onDecode('xml')}
           onContentChange={onXMLContentChange}
