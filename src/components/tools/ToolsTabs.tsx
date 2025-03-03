@@ -5,6 +5,7 @@ import { FileCode, Code, RefreshCw } from "lucide-react";
 import XMLTab from './XMLTab';
 import JSONTab from './JSONTab';
 import Base64Tab from './Base64Tab';
+import { Link, useLocation } from 'react-router-dom';
 
 interface ToolsTabsProps {
   xmlContent: string;
@@ -26,6 +27,7 @@ interface ToolsTabsProps {
   onXMLContentChange: (content: string) => void;
   onJSONContentChange: (content: string) => void;
   onTextSelect: (e: React.MouseEvent<HTMLTextAreaElement>, type: 'xml' | 'json') => void;
+  defaultTab?: 'xml' | 'json' | 'encodeDecode';
 }
 
 const ToolsTabs: React.FC<ToolsTabsProps> = ({
@@ -48,30 +50,49 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
   onXMLContentChange,
   onJSONContentChange,
   onTextSelect,
+  defaultTab = 'xml',
 }) => {
+  const location = useLocation();
+  
+  const determineActiveTab = () => {
+    if (location.pathname === '/xpath-tester') return 'xml';
+    if (location.pathname === '/json-tester') return 'json';
+    if (location.pathname === '/base64-encoder-decoder') return 'encodeDecode';
+    return defaultTab;
+  };
+  
   return (
-    <Tabs defaultValue="xml" className="w-full">
+    <Tabs defaultValue={determineActiveTab()} className="w-full">
       <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-100">
         <TabsTrigger 
           value="xml" 
           className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          asChild
         >
-          <FileCode className="w-4 h-4" />
-          XML Beautifier & Path Finder
+          <Link to="/xpath-tester" className="flex items-center gap-2 w-full justify-center">
+            <FileCode className="w-4 h-4" />
+            XML Beautifier & Path Finder
+          </Link>
         </TabsTrigger>
         <TabsTrigger 
           value="json" 
           className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          asChild
         >
-          <Code className="w-4 h-4" />
-          JSON Beautifier & Path Finder
+          <Link to="/json-tester" className="flex items-center gap-2 w-full justify-center">
+            <Code className="w-4 h-4" />
+            JSON Beautifier & Path Finder
+          </Link>
         </TabsTrigger>
         <TabsTrigger 
           value="encodeDecode" 
           className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          asChild
         >
-          <RefreshCw className="w-4 h-4" />
-          Base64 Converter
+          <Link to="/base64-encoder-decoder" className="flex items-center gap-2 w-full justify-center">
+            <RefreshCw className="w-4 h-4" />
+            Base64 Converter
+          </Link>
         </TabsTrigger>
       </TabsList>
 

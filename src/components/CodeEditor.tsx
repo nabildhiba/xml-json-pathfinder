@@ -17,7 +17,11 @@ declare global {
   }
 }
 
-const CodeEditor = () => {
+interface CodeEditorProps {
+  defaultTab?: 'xml' | 'json' | 'encodeDecode';
+}
+
+const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml' }) => {
   const [xmlContent, setXmlContent] = useState('');
   const [jsonContent, setJsonContent] = useState('');
   const [encodedContent, setEncodedContent] = useState('');
@@ -197,6 +201,7 @@ const CodeEditor = () => {
         onXMLContentChange={setXmlContent}
         onJSONContentChange={setJsonContent}
         onTextSelect={handleTextSelect}
+        defaultTab={defaultTab}
       />
     </div>
   );
