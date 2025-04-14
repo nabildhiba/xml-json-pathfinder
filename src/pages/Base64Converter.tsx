@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import CodeEditor from "@/components/CodeEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Base64Tab from '@/components/tools/Base64Tab';
+import ToolsTabs from '@/components/tools/ToolsTabs';
 import { encodeToBase64, decodeFromBase64 } from '@/utils/formatters';
 
 const Base64Converter = () => {
@@ -38,6 +38,30 @@ const Base64Converter = () => {
     // Placeholder for text selection handler
   };
 
+  // These are placeholder props needed by ToolsTabs
+  const placeholderProps = {
+    xmlContent: content,
+    jsonContent: content,
+    encodedContent: encodedContent,
+    showResult: showResult,
+    hasSelection: false,
+    selectedPath: '',
+    searchQuery: '',
+    foundPaths: [],
+    onSearchQueryChange: () => {},
+    onSearch: () => {},
+    onExtractPath: () => {},
+    onPathSelect: () => {},
+    onFormatXML: () => {},
+    onFormatJSON: () => {},
+    onEncode: () => handleEncode(),
+    onDecode: () => handleDecode(),
+    onXMLContentChange: handleContentChange,
+    onJSONContentChange: () => {},
+    onTextSelect: () => {},
+    defaultTab: 'encodeDecode' as 'xml' | 'json' | 'encodeDecode'
+  };
+
   return (
     <div className="container py-4 animate-fade-in">
       <h1 className="text-3xl font-bold text-center mb-4">Base64 Encoder/Decoder</h1>
@@ -45,15 +69,21 @@ const Base64Converter = () => {
         Encode or decode text to/from Base64 format with option to process files directly
       </p>
 
-      <Base64Tab
-        content={content}
-        encodedContent={encodedContent}
-        showResult={showResult}
-        onEncode={handleEncode}
-        onDecode={handleDecode}
-        onContentChange={handleContentChange}
-        onTextSelect={handleTextSelect}
-      />
+      {/* Add the ToolsTabs component for navigation */}
+      <ToolsTabs {...placeholderProps} />
+
+      {/* Keep the Base64Tab component for functionality */}
+      <div className="mt-8">
+        <Base64Tab
+          content={content}
+          encodedContent={encodedContent}
+          showResult={showResult}
+          onEncode={handleEncode}
+          onDecode={handleDecode}
+          onContentChange={handleContentChange}
+          onTextSelect={handleTextSelect}
+        />
+      </div>
     </div>
   );
 };
