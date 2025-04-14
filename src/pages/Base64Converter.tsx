@@ -69,21 +69,8 @@ const Base64Converter = () => {
         Encode or decode text to/from Base64 format with option to process files directly
       </p>
 
-      {/* Add the ToolsTabs component for navigation */}
+      {/* Navigation tabs */}
       <ToolsTabs {...placeholderProps} />
-
-      {/* Keep the Base64Tab component for functionality */}
-      <div className="mt-8">
-        <Base64Tab
-          content={content}
-          encodedContent={encodedContent}
-          showResult={showResult}
-          onEncode={handleEncode}
-          onDecode={handleDecode}
-          onContentChange={handleContentChange}
-          onTextSelect={handleTextSelect}
-        />
-      </div>
     </div>
   );
 };
