@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Copy, RefreshCw, Upload, Download } from "lucide-react";
@@ -26,34 +25,51 @@ const Base64Tab: React.FC<Base64TabProps> = ({
   onTextSelect,
 }) => {
   const [fileName, setFileName] = useState<string>("");
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, preview: boolean = true) => {
     const file = e.target.files?.[0];
     if (file) {
       setFileName(file.name);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        onContentChange(content);
-        toast.success(`File "${file.name}" uploaded successfully`);
-      };
-      reader.readAsText(file);
+      setUploadedFile(file);
+
+      if (preview) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target?.result as string;
+          onContentChange(content);
+          toast.success(`File "${file.name}" uploaded and previewed`);
+        };
+        reader.readAsText(file);
+      } else {
+        toast.success(`File "${file.name}" uploaded without preview`);
+      }
     }
   };
 
   const handleDirectProcess = (isEncode: boolean) => {
-    try {
-      const result = isEncode ? 
-        encodeToBase64(content) : 
-        decodeFromBase64(content);
-      
-      const filePrefix = isEncode ? 'encoded' : 'decoded';
-      downloadFile(result, `${fileName || filePrefix}_result.txt`);
-      toast.success(`Content ${isEncode ? 'encoded' : 'decoded'} and downloaded`);
-    } catch (error) {
-      toast.error(`Error ${isEncode ? 'encoding' : 'decoding'} content`);
+    if (!uploadedFile) {
+      toast.error("No file uploaded");
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const fileContent = e.target?.result as string;
+        const result = isEncode ? 
+          encodeToBase64(fileContent) : 
+          decodeFromBase64(fileContent);
+        
+        const filePrefix = isEncode ? 'encoded' : 'decoded';
+        downloadFile(result, `${fileName || filePrefix}_result.txt`);
+        toast.success(`Content ${isEncode ? 'encoded' : 'decoded'} and downloaded`);
+      } catch (error) {
+        toast.error(`Error ${isEncode ? 'encoding' : 'decoding'} content`);
+      }
+    };
+    reader.readAsText(uploadedFile);
   };
 
   const handleDownloadResult = () => {
@@ -84,11 +100,28 @@ const Base64Tab: React.FC<Base64TabProps> = ({
                 <Upload className="w-4 h-4" />
                 {fileName ? 'Change File' : 'Upload File'}
               </Button>
+
+              <Button
+                onClick={() => {
+                  fileInputRef.current?.click();
+                }}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Upload File (No Preview)
+              </Button>
               
               <input
                 ref={fileInputRef}
                 type="file"
-                onChange={handleFileUpload}
+                onChange={(e) => handleFileUpload(e, true)}
+                className="hidden"
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={(e) => handleFileUpload(e, false)}
                 className="hidden"
               />
             </div>
