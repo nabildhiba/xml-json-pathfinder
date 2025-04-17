@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Base64Tab from '@/components/tools/Base64Tab';
 import ToolsTabs from '@/components/tools/ToolsTabs';
-import { encodeToBase64, decodeFromBase64 } from '@/utils/formatters';
+import { encodeToBase64, decodeFromBase64, isBinaryContent } from '@/utils/formatters';
 import { toast } from "sonner";
 
 const Base64Converter = () => {
@@ -30,10 +30,21 @@ const Base64Converter = () => {
     }
 
     try {
-      const decoded = decodeFromBase64(content);
-      setEncodedContent(decoded);
-      setShowResult(true);
-      toast.success("Content decoded successfully");
+      // Check if this might be binary data
+      const isBinary = isBinaryContent(content);
+      
+      if (isBinary) {
+        // For binary data, we can just display the first part and indicate it's binary
+        setEncodedContent("Binary content detected. Use 'Decode & Download' to save the file.");
+        setShowResult(true);
+        toast.success("Binary content detected. Use the download option to save the file.");
+      } else {
+        // For text data, proceed with normal decoding
+        const decoded = decodeFromBase64(content);
+        setEncodedContent(decoded);
+        setShowResult(true);
+        toast.success("Content decoded successfully");
+      }
     } catch (error: any) {
       const errorMessage = error.message || "Invalid Base64 string";
       toast.error(`Error decoding content: ${errorMessage}`);

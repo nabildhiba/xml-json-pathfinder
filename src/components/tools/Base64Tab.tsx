@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Copy, RefreshCw, Upload, Download } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { encodeToBase64, decodeFromBase64, downloadFile } from '@/utils/formatters';
+import { encodeToBase64, decodeFromBase64, downloadFile, isBinaryContent } from '@/utils/formatters';
 import { toast } from "sonner";
 
 interface Base64TabProps {
@@ -38,13 +38,25 @@ const Base64Tab: React.FC<Base64TabProps> = ({
 
       if (preview) {
         const reader = new FileReader();
-        reader.onload = (e) => {
-          const content = e.target?.result as string;
-          onContentChange(content);
-          toast.success(`File "${file.name}" uploaded and previewed`);
-        };
-        // Use readAsText for text files and readAsDataURL for binary files
-        reader.readAsText(file);
+        if (file.type.startsWith('text/') || file.type === 'application/json' || file.type === 'application/xml') {
+          // For text-based files, use readAsText
+          reader.onload = (e) => {
+            const content = e.target?.result as string;
+            onContentChange(content);
+            toast.success(`File "${file.name}" uploaded and previewed`);
+          };
+          reader.readAsText(file);
+        } else {
+          // For binary files, use readAsDataURL to get base64 encoding
+          reader.onload = (e) => {
+            const result = e.target?.result as string;
+            // Remove the data URL prefix (e.g., "data:application/zip;base64,")
+            const base64Content = result.substring(result.indexOf(',') + 1);
+            onContentChange(base64Content);
+            toast.success(`File "${file.name}" uploaded and previewed as Base64`);
+          };
+          reader.readAsDataURL(file);
+        }
       } else {
         toast.success(`File "${file.name}" uploaded without preview`);
       }
@@ -54,59 +66,90 @@ const Base64Tab: React.FC<Base64TabProps> = ({
   const handleDirectProcess = (isEncode: boolean) => {
     // If we have an uploaded file without preview, process that file
     if (uploadedFile && !content) {
-      const reader = new FileReader();
-      
-      reader.onload = (e) => {
-        try {
-          let result: string;
-          const fileContent = e.target?.result as string;
-          
-          if (isEncode) {
-            // For encoding, we can use the standard function
-            result = encodeToBase64(fileContent);
-          } else {
-            // For decoding, we need to handle potential binary data
+      if (isEncode) {
+        // For encoding files, we need to read them first
+        const reader = new FileReader();
+        
+        if (uploadedFile.type.startsWith('text/') || 
+            uploadedFile.type === 'application/json' || 
+            uploadedFile.type === 'application/xml') {
+          // For text files
+          reader.onload = (e) => {
             try {
-              result = decodeFromBase64(fileContent);
+              const fileContent = e.target?.result as string;
+              const result = encodeToBase64(fileContent);
+              downloadFile(result, `${fileName.split('.')[0] || 'encoded'}.txt`);
+              toast.success(`Content encoded and downloaded`);
             } catch (error) {
-              toast.error(`Error decoding: Invalid Base64 input`);
-              return;
+              toast.error(`Error encoding content`);
+              console.error(error);
             }
-          }
-          
-          const filePrefix = isEncode ? 'encoded' : 'decoded';
-          downloadFile(result, `${fileName || filePrefix}_result.txt`);
-          toast.success(`Content ${isEncode ? 'encoded' : 'decoded'} and downloaded`);
-        } catch (error) {
-          toast.error(`Error ${isEncode ? 'encoding' : 'decoding'} content`);
-          console.error(error);
+          };
+          reader.readAsText(uploadedFile);
+        } else {
+          // For binary files
+          reader.onload = (e) => {
+            try {
+              const result = e.target?.result as string;
+              const base64Content = result.substring(result.indexOf(',') + 1);
+              downloadFile(base64Content, `${fileName.split('.')[0] || 'encoded'}.txt`);
+              toast.success(`Binary file encoded and downloaded`);
+            } catch (error) {
+              toast.error(`Error encoding binary file`);
+              console.error(error);
+            }
+          };
+          reader.readAsDataURL(uploadedFile);
         }
-      };
-      
-      // Use readAsText for processing the file
-      reader.readAsText(uploadedFile);
+      } else {
+        // For decoding directly to a file
+        // We assume the file contains BASE64 text to be decoded
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const fileContent = e.target?.result as string;
+            const decodedContent = decodeFromBase64(fileContent);
+            
+            // Check if the decoded content appears to be binary
+            const isBinary = isBinaryContent(fileContent);
+            downloadFile(fileContent, `${fileName.split('.')[0] || 'decoded'}_result.${isBinary ? 'zip' : 'txt'}`, isBinary);
+            toast.success(`Content decoded and downloaded`);
+          } catch (error: any) {
+            toast.error(`Error decoding: ${error.message || 'Invalid Base64 input'}`);
+            console.error(error);
+          }
+        };
+        reader.readAsText(uploadedFile);
+      }
     } 
     // Otherwise process the text content from the textarea
     else if (content) {
       try {
-        let result: string;
-        
         if (isEncode) {
-          result = encodeToBase64(content);
+          const result = encodeToBase64(content);
+          downloadFile(result, `${fileName.split('.')[0] || 'encoded'}_result.txt`);
+          toast.success(`Content encoded and downloaded`);
         } else {
+          // Decode and check if the input appears to be binary data
+          const isBinary = isBinaryContent(content);
+          
           try {
-            result = decodeFromBase64(content);
-          } catch (error) {
-            toast.error(`Error decoding: Invalid Base64 input`);
-            return;
+            // For binary content, download directly as binary
+            if (isBinary) {
+              downloadFile(content, `${fileName.split('.')[0] || 'decoded'}_result.zip`, true);
+            } else {
+              // For text content, decode and download as text
+              const decodedContent = decodeFromBase64(content);
+              downloadFile(decodedContent, `${fileName.split('.')[0] || 'decoded'}_result.txt`);
+            }
+            toast.success(`Content decoded and downloaded`);
+          } catch (error: any) {
+            toast.error(`Error decoding: ${error.message || 'Invalid Base64 input'}`);
+            console.error(error);
           }
         }
-        
-        const filePrefix = isEncode ? 'encoded' : 'decoded';
-        downloadFile(result, `${fileName || filePrefix}_result.txt`);
-        toast.success(`Content ${isEncode ? 'encoded' : 'decoded'} and downloaded`);
-      } catch (error) {
-        toast.error(`Error ${isEncode ? 'encoding' : 'decoding'} content`);
+      } catch (error: any) {
+        toast.error(`Error processing: ${error.message}`);
         console.error(error);
       }
     } else {
@@ -116,7 +159,9 @@ const Base64Tab: React.FC<Base64TabProps> = ({
 
   const handleDownloadResult = () => {
     if (encodedContent) {
-      downloadFile(encodedContent, `${fileName || 'result'}.txt`);
+      // Check if the result appears to be binary
+      const isBinary = isBinaryContent(content) && !content.startsWith("data:");
+      downloadFile(encodedContent, `${fileName.split('.')[0] || 'result'}.${isBinary ? 'zip' : 'txt'}`, isBinary);
       toast.success("Result downloaded successfully");
     }
   };
