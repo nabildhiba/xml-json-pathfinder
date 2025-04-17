@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
-import CodeEditor from "@/components/CodeEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Base64Tab from '@/components/tools/Base64Tab';
 import ToolsTabs from '@/components/tools/ToolsTabs';
 import { encodeToBase64, decodeFromBase64 } from '@/utils/formatters';
+import { toast } from "sonner";
 
 const Base64Converter = () => {
   const [content, setContent] = useState('');
@@ -15,7 +16,9 @@ const Base64Converter = () => {
       const encoded = encodeToBase64(content);
       setEncodedContent(encoded);
       setShowResult(true);
+      toast.success("Content encoded successfully");
     } catch (error) {
+      toast.error("Error encoding content");
       console.error("Encoding error:", error);
     }
   };
@@ -25,7 +28,9 @@ const Base64Converter = () => {
       const decoded = decodeFromBase64(content);
       setEncodedContent(decoded);
       setShowResult(true);
+      toast.success("Content decoded successfully");
     } catch (error) {
+      toast.error("Error decoding content: Invalid Base64 string");
       console.error("Decoding error:", error);
     }
   };
@@ -54,11 +59,11 @@ const Base64Converter = () => {
     onPathSelect: () => {},
     onFormatXML: () => {},
     onFormatJSON: () => {},
-    onEncode: () => handleEncode(),
-    onDecode: () => handleDecode(),
+    onEncode: handleEncode,
+    onDecode: handleDecode,
     onXMLContentChange: handleContentChange,
     onJSONContentChange: () => {},
-    onTextSelect: () => {},
+    onTextSelect: handleTextSelect,
     defaultTab: 'encodeDecode' as 'xml' | 'json' | 'encodeDecode'
   };
 

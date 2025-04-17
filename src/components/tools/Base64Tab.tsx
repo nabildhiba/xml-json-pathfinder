@@ -27,6 +27,7 @@ const Base64Tab: React.FC<Base64TabProps> = ({
   const [fileName, setFileName] = useState<string>("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const noPreviewInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, preview: boolean = true) => {
     const file = e.target.files?.[0];
@@ -49,18 +50,31 @@ const Base64Tab: React.FC<Base64TabProps> = ({
   };
 
   const handleDirectProcess = (isEncode: boolean) => {
-    if (!uploadedFile) {
-      toast.error("No file uploaded");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
+    // If we have an uploaded file without preview, process that file
+    if (uploadedFile && !content) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const fileContent = e.target?.result as string;
+          const result = isEncode ? 
+            encodeToBase64(fileContent) : 
+            decodeFromBase64(fileContent);
+          
+          const filePrefix = isEncode ? 'encoded' : 'decoded';
+          downloadFile(result, `${fileName || filePrefix}_result.txt`);
+          toast.success(`Content ${isEncode ? 'encoded' : 'decoded'} and downloaded`);
+        } catch (error) {
+          toast.error(`Error ${isEncode ? 'encoding' : 'decoding'} content`);
+        }
+      };
+      reader.readAsText(uploadedFile);
+    } 
+    // Otherwise process the text content from the textarea
+    else if (content) {
       try {
-        const fileContent = e.target?.result as string;
         const result = isEncode ? 
-          encodeToBase64(fileContent) : 
-          decodeFromBase64(fileContent);
+          encodeToBase64(content) : 
+          decodeFromBase64(content);
         
         const filePrefix = isEncode ? 'encoded' : 'decoded';
         downloadFile(result, `${fileName || filePrefix}_result.txt`);
@@ -68,8 +82,9 @@ const Base64Tab: React.FC<Base64TabProps> = ({
       } catch (error) {
         toast.error(`Error ${isEncode ? 'encoding' : 'decoding'} content`);
       }
-    };
-    reader.readAsText(uploadedFile);
+    } else {
+      toast.error("No content to process");
+    }
   };
 
   const handleDownloadResult = () => {
@@ -102,9 +117,7 @@ const Base64Tab: React.FC<Base64TabProps> = ({
               </Button>
 
               <Button
-                onClick={() => {
-                  fileInputRef.current?.click();
-                }}
+                onClick={() => noPreviewInputRef.current?.click()}
                 variant="outline"
                 className="flex items-center gap-2"
               >
@@ -119,7 +132,7 @@ const Base64Tab: React.FC<Base64TabProps> = ({
                 className="hidden"
               />
               <input
-                ref={fileInputRef}
+                ref={noPreviewInputRef}
                 type="file"
                 onChange={(e) => handleFileUpload(e, false)}
                 className="hidden"
@@ -165,7 +178,7 @@ const Base64Tab: React.FC<Base64TabProps> = ({
             <Button 
               onClick={() => handleDirectProcess(true)} 
               variant="default"
-              disabled={!content}
+              disabled={!content && !uploadedFile}
               className="flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
@@ -175,7 +188,7 @@ const Base64Tab: React.FC<Base64TabProps> = ({
             <Button 
               onClick={() => handleDirectProcess(false)}
               variant="default"
-              disabled={!content} 
+              disabled={!content && !uploadedFile} 
               className="flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
