@@ -24,13 +24,19 @@ const Base64Converter = () => {
   };
 
   const handleDecode = () => {
+    if (!content || content.trim() === '') {
+      toast.error("No content to decode");
+      return;
+    }
+
     try {
       const decoded = decodeFromBase64(content);
       setEncodedContent(decoded);
       setShowResult(true);
       toast.success("Content decoded successfully");
-    } catch (error) {
-      toast.error("Error decoding content: Invalid Base64 string");
+    } catch (error: any) {
+      const errorMessage = error.message || "Invalid Base64 string";
+      toast.error(`Error decoding content: ${errorMessage}`);
       console.error("Decoding error:", error);
     }
   };

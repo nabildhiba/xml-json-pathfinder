@@ -19,7 +19,19 @@ export const encodeToBase64 = (content: string): string => {
 };
 
 export const decodeFromBase64 = (content: string): string => {
-  return decodeURIComponent(escape(atob(content)));
+  try {
+    // First try the standard decoding
+    return decodeURIComponent(escape(atob(content)));
+  } catch (error) {
+    // If standard decoding fails, try a more robust approach
+    try {
+      // For binary data that cannot be properly URI decoded
+      return atob(content);
+    } catch (innerError) {
+      // If even this fails, throw an error with clear message
+      throw new Error("The content is not a valid Base64 string");
+    }
+  }
 };
 
 export const findJSONPaths = (obj: any, currentPath: string = '', paths: string[] = []): string[] => {

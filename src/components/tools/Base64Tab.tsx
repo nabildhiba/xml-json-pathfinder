@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Copy, RefreshCw, Upload, Download } from "lucide-react";
@@ -42,6 +43,7 @@ const Base64Tab: React.FC<Base64TabProps> = ({
           onContentChange(content);
           toast.success(`File "${file.name}" uploaded and previewed`);
         };
+        // Use readAsText for text files and readAsDataURL for binary files
         reader.readAsText(file);
       } else {
         toast.success(`File "${file.name}" uploaded without preview`);
@@ -53,34 +55,59 @@ const Base64Tab: React.FC<Base64TabProps> = ({
     // If we have an uploaded file without preview, process that file
     if (uploadedFile && !content) {
       const reader = new FileReader();
+      
       reader.onload = (e) => {
         try {
+          let result: string;
           const fileContent = e.target?.result as string;
-          const result = isEncode ? 
-            encodeToBase64(fileContent) : 
-            decodeFromBase64(fileContent);
+          
+          if (isEncode) {
+            // For encoding, we can use the standard function
+            result = encodeToBase64(fileContent);
+          } else {
+            // For decoding, we need to handle potential binary data
+            try {
+              result = decodeFromBase64(fileContent);
+            } catch (error) {
+              toast.error(`Error decoding: Invalid Base64 input`);
+              return;
+            }
+          }
           
           const filePrefix = isEncode ? 'encoded' : 'decoded';
           downloadFile(result, `${fileName || filePrefix}_result.txt`);
           toast.success(`Content ${isEncode ? 'encoded' : 'decoded'} and downloaded`);
         } catch (error) {
           toast.error(`Error ${isEncode ? 'encoding' : 'decoding'} content`);
+          console.error(error);
         }
       };
+      
+      // Use readAsText for processing the file
       reader.readAsText(uploadedFile);
     } 
     // Otherwise process the text content from the textarea
     else if (content) {
       try {
-        const result = isEncode ? 
-          encodeToBase64(content) : 
-          decodeFromBase64(content);
+        let result: string;
+        
+        if (isEncode) {
+          result = encodeToBase64(content);
+        } else {
+          try {
+            result = decodeFromBase64(content);
+          } catch (error) {
+            toast.error(`Error decoding: Invalid Base64 input`);
+            return;
+          }
+        }
         
         const filePrefix = isEncode ? 'encoded' : 'decoded';
         downloadFile(result, `${fileName || filePrefix}_result.txt`);
         toast.success(`Content ${isEncode ? 'encoded' : 'decoded'} and downloaded`);
       } catch (error) {
         toast.error(`Error ${isEncode ? 'encoding' : 'decoding'} content`);
+        console.error(error);
       }
     } else {
       toast.error("No content to process");
