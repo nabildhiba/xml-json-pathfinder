@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ToolsTabs from '@/components/tools/ToolsTabs';
 import { HelpCircle, ShieldQuestion, MessageCircleQuestion } from 'lucide-react';
@@ -66,6 +67,11 @@ const XMLTester = () => {
 
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
+      <p className="text-center text-gray-600 mb-8">
+        Free online tool for code formatting, path lookup, and Base64 conversion
+      </p>
+
       <ToolsTabs 
         xmlContent={xmlContent}
         jsonContent={jsonContent}

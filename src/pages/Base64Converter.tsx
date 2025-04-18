@@ -86,9 +86,9 @@ const Base64Converter = () => {
 
   return (
     <div className="container py-4 animate-fade-in">
-      <h1 className="text-3xl font-bold text-center mb-4">Base64 Encoder/Decoder</h1>
+      <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
       <p className="text-center text-gray-600 mb-8">
-        Encode or decode text to/from Base64 format with option to process files directly
+        Free online tool for code formatting, path lookup, and Base64 conversion
       </p>
 
       {/* Navigation tabs */}
