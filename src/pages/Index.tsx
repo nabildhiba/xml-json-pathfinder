@@ -1,10 +1,10 @@
-
 import React from 'react';
 import CodeEditor from "@/components/CodeEditor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { FileJson, FileCode, RefreshCw } from "lucide-react";
+import IconGenerator from '@/components/IconGenerator';
 
 const Index = () => {
   return (
@@ -19,6 +19,8 @@ const Index = () => {
           in your browser. Built for developers, QA testers, analysts, and anyone working with structured data.
         </p>
       </div>
+
+      <IconGenerator />
 
       <div className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Available Tools</h2>
