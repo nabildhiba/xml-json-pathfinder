@@ -1,9 +1,6 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import ToolsTabs from './tools/ToolsTabs';
-import { AdSenseBanner } from './ads/AdSenseBanner';
-import { CodeEditorHeader } from './code/CodeEditorHeader';
 import {
   formatXMLContent,
   formatJSONContent,
@@ -12,6 +9,12 @@ import {
   findJSONPaths,
   findXMLPaths
 } from '@/utils/formatters';
+
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
 
 interface CodeEditorProps {
   defaultTab?: 'xml' | 'json' | 'encodeDecode';
@@ -29,6 +32,17 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
   const [selectedText, setSelectedText] = useState('');
   const [currentEditor, setCurrentEditor] = useState<'xml' | 'json'>('xml');
   const [showResult, setShowResult] = useState(false);
+
+  useEffect(() => {
+    try {
+      const pushAd = () => {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      };
+      pushAd();
+    } catch (err) {
+      console.error('AdSense error:', err);
+    }
+  }, []);
 
   const formatXML = () => {
     try {
@@ -145,8 +159,32 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
 
   return (
     <div className="container py-4 animate-fade-in">
-      <AdSenseBanner />
-      <CodeEditorHeader hideHeader={hideHeader} />
+      {/* Top AdSense Banner */}
+      <div className="w-full mb-8">
+        <ins
+          className="adsbygoogle"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '90px',
+            marginBottom: '1rem'
+          }}
+          data-ad-client="ca-pub-7479735239636417"
+          data-ad-slot="2770178735"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
+      </div>
+
+      {!hideHeader && (
+        <>
+          <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
+          <p className="text-center text-gray-600 mb-8">
+            Free online tool for code formatting, path lookup, and Base64 conversion
+          </p>
+        </>
+      )}
+
       <ToolsTabs
         xmlContent={xmlContent}
         jsonContent={jsonContent}
