@@ -5,6 +5,7 @@ import Base64Tab from '@/components/tools/Base64Tab';
 import ToolsTabs from '@/components/tools/ToolsTabs';
 import { encodeToBase64, decodeFromBase64, isBinaryContent } from '@/utils/formatters';
 import { toast } from "sonner";
+import HomeButton from '@/components/HomeButton';
 
 const Base64Converter = () => {
   const [content, setContent] = useState('');
@@ -85,7 +86,8 @@ const Base64Converter = () => {
   };
 
   return (
-    <div className="container py-4 animate-fade-in">
+    <div className="container py-4 animate-fade-in relative">
+      <HomeButton />
       <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
       <p className="text-center text-gray-600 mb-8">
         Free online tool for code formatting, path lookup, and Base64 conversion
