@@ -1,41 +1,51 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { RunwareService } from '@/services/RunwareService';
 import { toast } from 'sonner';
 
 const IconGenerator = () => {
-  const [apiKey, setApiKey] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generateIcon = async () => {
-    if (!apiKey) {
-      toast.error('Please enter your Runware API key');
-      return;
-    }
-
     setIsGenerating(true);
-    const runware = new RunwareService(apiKey);
 
     try {
-      const faviconPrompt = "A minimalist icon for a JSON and XML web tool. Simple, modern, abstract representation of code or data structure. Use vivid purple (#8B5CF6) as the main color. Clean vector style, suitable for favicon.";
-      const logoPrompt = "A modern, professional logo for JSONXMLKit - a web tool for JSON and XML formatting. Incorporate coding symbols or brackets. Use vivid purple (#8B5CF6) as the main color. Clean vector style.";
-
-      const [favicon, logo] = await Promise.all([
-        runware.generateImage({ positivePrompt: faviconPrompt, width: 512, height: 512 }),
-        runware.generateImage({ positivePrompt: logoPrompt, width: 1024, height: 512 })
-      ]);
+      // Pre-defined image URLs
+      const faviconUrl = "https://images.unsplash.com/photo-1518770660439-4636190af475";
+      const logoUrl = "https://images.unsplash.com/photo-1461749280684-dccba630e2f6";
 
       // Update the favicon link in index.html
       const faviconLink = document.querySelector("link[rel*='icon']");
       if (faviconLink) {
-        faviconLink.setAttribute('href', favicon.imageURL);
+        faviconLink.setAttribute('href', faviconUrl);
+      } else {
+        // Create a new favicon link if it doesn't exist
+        const newLink = document.createElement('link');
+        newLink.rel = 'icon';
+        newLink.href = faviconUrl;
+        document.head.appendChild(newLink);
       }
 
-      toast.success('Icons generated successfully! Check the preview below.');
+      toast.success('Icons set successfully! The favicon has been updated.');
+      
+      // Display the generated images
+      const previewContainer = document.getElementById('icon-preview');
+      if (previewContainer) {
+        previewContainer.innerHTML = `
+          <div class="mt-4 space-y-4">
+            <div>
+              <p class="text-sm font-medium mb-2">Favicon:</p>
+              <img src="${faviconUrl}" alt="Generated Favicon" class="w-16 h-16 object-cover rounded border" />
+            </div>
+            <div>
+              <p class="text-sm font-medium mb-2">Logo:</p>
+              <img src="${logoUrl}" alt="Generated Logo" class="w-full max-h-32 object-cover rounded border" />
+            </div>
+          </div>
+        `;
+      }
     } catch (error) {
-      toast.error('Error generating icons. Please try again.');
+      toast.error('Error setting icons. Please try again.');
     } finally {
       setIsGenerating(false);
     }
@@ -44,25 +54,19 @@ const IconGenerator = () => {
   return (
     <div className="w-full max-w-md mx-auto space-y-4 p-4">
       <div className="space-y-2">
-        <h2 className="text-lg font-medium">Generate Site Icons</h2>
+        <h2 className="text-lg font-medium">Set Site Icons</h2>
         <p className="text-sm text-gray-500">
-          Enter your Runware API key to generate a favicon and logo for the site.
-          Get your API key at <a href="https://runware.ai" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">runware.ai</a>
+          Click the button below to set a pre-defined favicon and logo for the site.
         </p>
       </div>
-      <Input
-        type="password"
-        placeholder="Enter your Runware API key"
-        value={apiKey}
-        onChange={(e) => setApiKey(e.target.value)}
-      />
       <Button
         onClick={generateIcon}
         disabled={isGenerating}
         className="w-full"
       >
-        {isGenerating ? 'Generating...' : 'Generate Icons'}
+        {isGenerating ? 'Setting Icons...' : 'Set Icons'}
       </Button>
+      <div id="icon-preview" className="mt-4"></div>
     </div>
   );
 };
