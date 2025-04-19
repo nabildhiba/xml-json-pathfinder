@@ -7,7 +7,7 @@ const JSONTester = () => {
   return (
     <div className="relative">
       <HomeButton />
-      <CodeEditor defaultTab="json" />
+      <CodeEditor defaultTab="json" hideHeader={false} />
     </div>
   );
 };

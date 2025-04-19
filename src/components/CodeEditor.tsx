@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import ToolsTabs from './tools/ToolsTabs';
@@ -19,9 +18,10 @@ declare global {
 
 interface CodeEditorProps {
   defaultTab?: 'xml' | 'json' | 'encodeDecode';
+  hideHeader?: boolean;
 }
 
-const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml' }) => {
+const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader = false }) => {
   const [xmlContent, setXmlContent] = useState('');
   const [jsonContent, setJsonContent] = useState('');
   const [encodedContent, setEncodedContent] = useState('');
@@ -176,10 +176,14 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml' }) => {
         />
       </div>
 
-      <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
-      <p className="text-center text-gray-600 mb-8">
-        Free online tool for code formatting, path lookup, and Base64 conversion
-      </p>
+      {!hideHeader && (
+        <>
+          <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
+          <p className="text-center text-gray-600 mb-8">
+            Free online tool for code formatting, path lookup, and Base64 conversion
+          </p>
+        </>
+      )}
 
       <ToolsTabs
         xmlContent={xmlContent}
