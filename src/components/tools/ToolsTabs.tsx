@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { FileCode, Code, RefreshCw } from "lucide-react";
 import XMLTab from './XMLTab';
 import JSONTab from './JSONTab';
 import Base64Tab from './Base64Tab';
-import { Link, useLocation } from 'react-router-dom';
+import NavTabsTrigger from './NavTabsTrigger';
+import { useLocation } from 'react-router-dom';
 
 interface ToolsTabsProps {
   xmlContent: string;
@@ -63,56 +64,37 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
   
   return (
     <Tabs defaultValue={determineActiveTab()} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-100 h-12"> {/* Added fixed height */}
-        <TabsTrigger 
-          value="xml" 
-          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white px-4" // Added padding
-          asChild
-        >
-          <Link to="/xpath-tester" className="flex items-center gap-2 w-full justify-center">
-            <FileCode className="w-4 h-4" />
-            XML Beautifier & Path Finder
-          </Link>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="json" 
-          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white px-4" // Added padding
-          asChild
-        >
-          <Link to="/json-tester" className="flex items-center gap-2 w-full justify-center">
-            <Code className="w-4 h-4" />
-            JSON Beautifier & Path Finder
-          </Link>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="encodeDecode" 
-          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white px-4" // Added padding
-          asChild
-        >
-          <Link to="/base64-encoder-decoder" className="flex items-center gap-2 w-full justify-center">
-            <RefreshCw className="w-4 h-4" />
-            Base64 Converter
-          </Link>
-        </TabsTrigger>
+      <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-100 h-12">
+        <NavTabsTrigger value="xml" to="/xpath-tester" icon={<FileCode className="w-4 h-4" />}>
+          XML Beautifier & Path Finder
+        </NavTabsTrigger>
+        <NavTabsTrigger value="json" to="/json-tester" icon={<Code className="w-4 h-4" />}>
+          JSON Beautifier & Path Finder
+        </NavTabsTrigger>
+        <NavTabsTrigger value="encodeDecode" to="/base64-encoder-decoder" icon={<RefreshCw className="w-4 h-4" />}>
+          Base64 Converter
+        </NavTabsTrigger>
       </TabsList>
 
       <TabsContent value="xml">
-        <XMLTab
-          content={xmlContent}
-          encodedContent={encodedContent}
-          showResult={showResult}
-          hasSelection={hasSelection}
-          selectedPath={selectedPath}
-          searchQuery={searchQuery}
-          foundPaths={foundPaths}
-          onSearchQueryChange={onSearchQueryChange}
-          onSearch={() => onSearch('xml')}
-          onExtractPath={onExtractPath}
-          onPathSelect={onPathSelect}
-          onFormat={onFormatXML}
-          onContentChange={onXMLContentChange}
-          onTextSelect={(e) => onTextSelect(e, 'xml')}
-        />
+        <div className="w-full"> {/* Ensure matching width for consistency */}
+          <XMLTab
+            content={xmlContent}
+            encodedContent={encodedContent}
+            showResult={showResult}
+            hasSelection={hasSelection}
+            selectedPath={selectedPath}
+            searchQuery={searchQuery}
+            foundPaths={foundPaths}
+            onSearchQueryChange={onSearchQueryChange}
+            onSearch={() => onSearch('xml')}
+            onExtractPath={onExtractPath}
+            onPathSelect={onPathSelect}
+            onFormat={onFormatXML}
+            onContentChange={onXMLContentChange}
+            onTextSelect={(e) => onTextSelect(e, 'xml')}
+          />
+        </div>
       </TabsContent>
 
       <TabsContent value="json">
