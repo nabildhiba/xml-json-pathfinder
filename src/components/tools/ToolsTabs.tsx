@@ -63,10 +63,10 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
   
   return (
     <Tabs defaultValue={determineActiveTab()} className="w-full">
-      <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-100">
+      <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-100 h-12"> {/* Added fixed height */}
         <TabsTrigger 
           value="xml" 
-          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white px-4" // Added padding
           asChild
         >
           <Link to="/xpath-tester" className="flex items-center gap-2 w-full justify-center">
@@ -76,7 +76,7 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger 
           value="json" 
-          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white px-4" // Added padding
           asChild
         >
           <Link to="/json-tester" className="flex items-center gap-2 w-full justify-center">
@@ -86,7 +86,7 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger 
           value="encodeDecode" 
-          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white"
+          className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-white px-4" // Added padding
           asChild
         >
           <Link to="/base64-encoder-decoder" className="flex items-center gap-2 w-full justify-center">
