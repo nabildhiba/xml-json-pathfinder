@@ -1,10 +1,9 @@
-
 import React from 'react';
 import CodeEditor from "@/components/CodeEditor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { FileJson, FileCode, RefreshCw, HelpCircle, ShieldQuestion, MessageCircleQuestion, BookOpen } from "lucide-react";
+import { FileJson, FileCode, RefreshCw } from "lucide-react";
 
 const Index = () => {
   return (
@@ -81,10 +80,7 @@ const Index = () => {
           </AccordionItem>
           <AccordionItem value="backstory">
             <AccordionTrigger>
-              <div className="flex items-center">
-                <BookOpen className="w-6 h-6 text-primary mr-3" />
-                Why did you create JSONXMLKit?
-              </div>
+              Why did you create JSONXMLKit?
             </AccordionTrigger>
             <AccordionContent>
               I built JSONXMLKit to make quick data formatting and extraction easier — without uploading files or dealing with heavy tools. 
