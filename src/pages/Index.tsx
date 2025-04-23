@@ -1,9 +1,10 @@
+
 import React from 'react';
 import CodeEditor from "@/components/CodeEditor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { FileJson, FileCode, RefreshCw, HelpCircle, ShieldQuestion, MessageCircleQuestion, BookQuestion } from "lucide-react";
+import { FileJson, FileCode, RefreshCw, HelpCircle, ShieldQuestion, MessageCircleQuestion, BookOpen } from "lucide-react";
 
 const Index = () => {
   return (
@@ -81,7 +82,7 @@ const Index = () => {
           <AccordionItem value="backstory">
             <AccordionTrigger>
               <div className="flex items-center">
-                <BookQuestion className="w-6 h-6 text-primary mr-3" />
+                <BookOpen className="w-6 h-6 text-primary mr-3" />
                 Why did you create JSONXMLKit?
               </div>
             </AccordionTrigger>
