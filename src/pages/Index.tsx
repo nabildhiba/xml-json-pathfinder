@@ -1,10 +1,9 @@
-
 import React from 'react';
 import CodeEditor from "@/components/CodeEditor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { FileJson, FileCode, RefreshCw } from "lucide-react";
+import { FileJson, FileCode, RefreshCw, HelpCircle, ShieldQuestion, MessageCircleQuestion, BookQuestion } from "lucide-react";
 
 const Index = () => {
   return (
@@ -77,6 +76,25 @@ const Index = () => {
             <AccordionTrigger>Do the tools support large files?</AccordionTrigger>
             <AccordionContent>
               Yes, the tools are optimized for performance and can handle reasonably large JSON, XML, and file uploads.
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="backstory">
+            <AccordionTrigger>
+              <div className="flex items-center">
+                <BookQuestion className="w-6 h-6 text-primary mr-3" />
+                Why did you create JSONXMLKit?
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              I built JSONXMLKit to make quick data formatting and extraction easier — without uploading files or dealing with heavy tools. 
+              <a 
+                href="https://dev.to/makertoo/why-i-built-jsonxmlkit-free-jsonxml-tools-that-run-in-your-browser-53b7" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="ml-2 text-primary hover:underline"
+              >
+                Read the full backstory →
+              </a>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
