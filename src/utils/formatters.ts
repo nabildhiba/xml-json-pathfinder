@@ -234,6 +234,10 @@ export const findXMLPaths = (xmlContent: string): string[] => {
           paths.push(`/${currentPath}/text()`);
           // Also add a path that includes the actual text value for easier matching
           paths.push(`/${currentPath}[text()="${textContent}"]`);
+          // Add contains version for partial matches
+          if (textContent.length > 10) {
+            paths.push(`/${currentPath}[contains(text(),"${textContent.substring(0, 20)}")]`);
+          }
         }
         
         // Process child elements
@@ -242,9 +246,15 @@ export const findXMLPaths = (xmlContent: string): string[] => {
         }
         
         // Add XPath-style paths for easier selection
-        if (textContent) {
-          paths.push(`//${element.nodeName}`);
-          paths.push(`//${element.nodeName}[contains(text(),"${textContent.substring(0, 20)}")]`);
+        paths.push(`//${element.nodeName}`);
+        
+        // Add indexed paths for elements with same names
+        const siblings = element.parentElement ? 
+          Array.from(element.parentElement.children).filter(child => child.nodeName === element.nodeName) : [];
+        if (siblings.length > 1) {
+          const index = siblings.indexOf(element) + 1;
+          paths.push(`/${currentPath}[${index}]`);
+          paths.push(`//${element.nodeName}[${index}]`);
         }
       }
     };

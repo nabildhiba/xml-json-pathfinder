@@ -58,7 +58,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
       toast.success("XML formatted and validated successfully!");
     } catch (error) {
       console.error("XML formatting error:", error);
-      toast.error("Invalid XML content! Please check your XML syntax.");
+      toast.error(`Invalid XML content: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -111,10 +111,21 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
     console.log("Text selected:", selected);
 
     if (selected && selected.trim()) {
-      setSelectedText(selected.trim());
+      let cleanedSelection = selected.trim();
+      
+      // Handle closing tags by extracting just the tag name
+      if (cleanedSelection.startsWith('</') && cleanedSelection.endsWith('>')) {
+        cleanedSelection = cleanedSelection.replace('</', '').replace('>', '');
+      }
+      // Handle opening tags by extracting just the tag name
+      else if (cleanedSelection.startsWith('<') && cleanedSelection.endsWith('>')) {
+        cleanedSelection = cleanedSelection.replace('<', '').replace('>', '').split(' ')[0];
+      }
+      
+      setSelectedText(cleanedSelection);
       setHasSelection(true);
       setCurrentEditor(type);
-      console.log("Selection set:", selected.trim(), "Editor:", type);
+      console.log("Cleaned selection set:", cleanedSelection, "Editor:", type);
     } else {
       setHasSelection(false);
       setSelectedText('');
@@ -199,22 +210,38 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         const paths = findXMLPaths(xmlContent);
         console.log("XML paths found:", paths);
         
-        // Improved XML path matching
+        // Improved XML path matching with multiple strategies
         let matchingPath = paths.find(path => {
-          // Check if path ends with the selected text as an element name
           const pathParts = path.split('/');
           const lastElement = pathParts[pathParts.length - 1];
-          return lastElement === selectedText || 
-                 lastElement.includes(selectedText) ||
-                 path.includes(`/${selectedText}`) ||
-                 path.includes(selectedText);
+          
+          // Direct element name match
+          if (lastElement === selectedText) return true;
+          
+          // Check if path contains the selected text as an element
+          if (path.includes(`/${selectedText}`)) return true;
+          
+          // Check for text content matches
+          if (path.includes(`[text()="${selectedText}"]`)) return true;
+          
+          // Check for partial text content matches
+          if (path.includes(`[contains(text(),"${selectedText}")]`)) return true;
+          
+          return false;
         });
+        
+        if (!matchingPath) {
+          // Try a more flexible search for element names
+          matchingPath = paths.find(path => 
+            path.toLowerCase().includes(selectedText.toLowerCase())
+          );
+        }
         
         if (matchingPath) {
           setSelectedPath(matchingPath);
           toast.success("XML path extracted successfully!");
         } else {
-          // If no direct match, try to construct a path
+          // Generate a simple XPath for the element
           const constructedPath = `//${selectedText}`;
           setSelectedPath(constructedPath);
           toast.success("XPath generated based on selection!");
