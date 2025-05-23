@@ -1,9 +1,8 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Copy, RefreshCw, Upload, Download } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { encodeToBase64, decodeFromBase64, downloadFile, isBinaryContent } from '@/utils/formatters';
+import { encodeToBase64, decodeFromBase64, downloadFile, isBinaryContent, detectFileType } from '@/utils/formatters';
 import { toast } from "sonner";
 
 interface Base64TabProps {
@@ -108,12 +107,12 @@ const Base64Tab: React.FC<Base64TabProps> = ({
         reader.onload = (e) => {
           try {
             const fileContent = e.target?.result as string;
-            const decodedContent = decodeFromBase64(fileContent);
             
             // Check if the decoded content appears to be binary
             const isBinary = isBinaryContent(fileContent);
-            downloadFile(fileContent, `${fileName.split('.')[0] || 'decoded'}_result.${isBinary ? 'zip' : 'txt'}`, isBinary);
-            toast.success(`Content decoded and downloaded`);
+            const fileInfo = detectFileType(fileContent);
+            downloadFile(fileContent, `${fileName.split('.')[0] || 'decoded'}_result.${fileInfo.extension}`, isBinary);
+            toast.success(`Content decoded and downloaded as ${fileInfo.extension.toUpperCase()}`);
           } catch (error: any) {
             toast.error(`Error decoding: ${error.message || 'Invalid Base64 input'}`);
             console.error(error);
@@ -134,15 +133,17 @@ const Base64Tab: React.FC<Base64TabProps> = ({
           const isBinary = isBinaryContent(content);
           
           try {
-            // For binary content, download directly as binary
+            // For binary content, download with proper file type detection
             if (isBinary) {
-              downloadFile(content, `${fileName.split('.')[0] || 'decoded'}_result.zip`, true);
+              const fileInfo = detectFileType(content);
+              downloadFile(content, `${fileName.split('.')[0] || 'decoded'}_result.${fileInfo.extension}`, true);
+              toast.success(`Content decoded and downloaded as ${fileInfo.extension.toUpperCase()}`);
             } else {
               // For text content, decode and download as text
               const decodedContent = decodeFromBase64(content);
               downloadFile(decodedContent, `${fileName.split('.')[0] || 'decoded'}_result.txt`);
+              toast.success(`Content decoded and downloaded`);
             }
-            toast.success(`Content decoded and downloaded`);
           } catch (error: any) {
             toast.error(`Error decoding: ${error.message || 'Invalid Base64 input'}`);
             console.error(error);
@@ -159,10 +160,16 @@ const Base64Tab: React.FC<Base64TabProps> = ({
 
   const handleDownloadResult = () => {
     if (encodedContent) {
-      // Check if the result appears to be binary
+      // Check if the result appears to be binary and get proper file info
       const isBinary = isBinaryContent(content) && !content.startsWith("data:");
-      downloadFile(encodedContent, `${fileName.split('.')[0] || 'result'}.${isBinary ? 'zip' : 'txt'}`, isBinary);
-      toast.success("Result downloaded successfully");
+      if (isBinary) {
+        const fileInfo = detectFileType(content);
+        downloadFile(encodedContent, `${fileName.split('.')[0] || 'result'}.${fileInfo.extension}`, true);
+        toast.success(`Result downloaded as ${fileInfo.extension.toUpperCase()}`);
+      } else {
+        downloadFile(encodedContent, `${fileName.split('.')[0] || 'result'}.txt`);
+        toast.success("Result downloaded successfully");
+      }
     }
   };
 

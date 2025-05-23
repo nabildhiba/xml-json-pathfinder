@@ -32,28 +32,66 @@ export const decodeFromBase64 = (content: string): string => {
   }
 };
 
-// Check if the content appears to be binary (non-text) data
+// Improved binary content detection with better file type identification
 export const isBinaryContent = (data: string): boolean => {
   // Check for common binary file signatures in the first bytes
   const patterns = [
     // ZIP files
     "UEs", "PK",
     // PDF files
-    "JVBE", "%PDF",
+    "JVBE", "%PDF", "JVBERi0",
     // PNG files
     "iVBO", "iVBOR",
     // JPG files
     "/9j/", "/9g=",
     // GIF files
     "R0lG", "GIF8",
+    // Word documents
+    "UEsD", "504B",
+    // Excel files
+    "UEsD", "504B",
   ];
   
   const startOfContent = data.substring(0, 20);
   return patterns.some(pattern => startOfContent.includes(pattern));
 };
 
+// Enhanced file type detection from Base64 content
+export const detectFileType = (base64Content: string): { extension: string; mimeType: string } => {
+  const startOfContent = base64Content.substring(0, 20);
+  
+  // PDF detection
+  if (startOfContent.includes("JVBE") || startOfContent.includes("JVBERi0")) {
+    return { extension: "pdf", mimeType: "application/pdf" };
+  }
+  
+  // ZIP detection
+  if (startOfContent.includes("UEs") || startOfContent.includes("PK")) {
+    return { extension: "zip", mimeType: "application/zip" };
+  }
+  
+  // PNG detection
+  if (startOfContent.includes("iVBO") || startOfContent.includes("iVBOR")) {
+    return { extension: "png", mimeType: "image/png" };
+  }
+  
+  // JPG detection
+  if (startOfContent.includes("/9j/") || startOfContent.includes("/9g=")) {
+    return { extension: "jpg", mimeType: "image/jpeg" };
+  }
+  
+  // GIF detection
+  if (startOfContent.includes("R0lG") || startOfContent.includes("GIF8")) {
+    return { extension: "gif", mimeType: "image/gif" };
+  }
+  
+  // Default to binary file
+  return { extension: "bin", mimeType: "application/octet-stream" };
+};
+
 export const downloadFile = (content: string, filename: string, isBinary = false) => {
   let blob;
+  let finalFilename = filename;
   
   if (isBinary) {
     // For binary data, convert base64 to binary
@@ -72,23 +110,15 @@ export const downloadFile = (content: string, filename: string, isBinary = false
       byteArrays.push(byteArray);
     }
     
-    blob = new Blob(byteArrays);
+    // Detect file type and set appropriate extension and MIME type
+    const fileInfo = detectFileType(content);
     
-    // Try to determine file extension based on binary signature
-    if (filename.endsWith('.txt')) {
-      // Check first bytes for common file signatures
-      const firstBytes = byteCharacters.substring(0, 4);
-      if (firstBytes.startsWith('PK')) {
-        filename = filename.replace(/\.txt$/, '.zip');
-      } else if (firstBytes.startsWith('%PDF')) {
-        filename = filename.replace(/\.txt$/, '.pdf');
-      } else if (firstBytes.includes('PNG')) {
-        filename = filename.replace(/\.txt$/, '.png');
-      } else if (firstBytes.includes('JFIF') || firstBytes.includes('Exif')) {
-        filename = filename.replace(/\.txt$/, '.jpg');
-      } else if (firstBytes.includes('GIF8')) {
-        filename = filename.replace(/\.txt$/, '.gif');
-      }
+    blob = new Blob(byteArrays, { type: fileInfo.mimeType });
+    
+    // Update filename with correct extension if it ends with .txt or .zip
+    if (finalFilename.endsWith('.txt') || finalFilename.endsWith('.zip')) {
+      const baseName = finalFilename.replace(/\.(txt|zip)$/, '');
+      finalFilename = `${baseName}.${fileInfo.extension}`;
     }
   } else {
     // For text data
@@ -98,7 +128,7 @@ export const downloadFile = (content: string, filename: string, isBinary = false
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = filename;
+  a.download = finalFilename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
