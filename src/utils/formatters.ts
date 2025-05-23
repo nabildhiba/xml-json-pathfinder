@@ -1,11 +1,46 @@
 export const formatXMLContent = (content: string): string => {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(content, "text/xml");
-  const serializer = new XMLSerializer();
-  return serializer.serializeToString(xmlDoc)
-    .replace(/>/g, ">\n")
-    .replace(/\n\s*\n/g, "\n")
-    .trim();
+  try {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(content, "text/xml");
+    
+    // Check for parsing errors
+    const parseError = xmlDoc.querySelector("parsererror");
+    if (parseError) {
+      throw new Error("Invalid XML syntax");
+    }
+    
+    const serializer = new XMLSerializer();
+    const serialized = serializer.serializeToString(xmlDoc);
+    
+    // Better formatting with proper indentation
+    let formatted = serialized;
+    formatted = formatted.replace(/></g, '>\n<');
+    formatted = formatted.replace(/^\s*\n/gm, '');
+    
+    // Add proper indentation
+    const lines = formatted.split('\n');
+    let indentLevel = 0;
+    const indentedLines = lines.map(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return '';
+      
+      if (trimmed.startsWith('</')) {
+        indentLevel = Math.max(0, indentLevel - 1);
+      }
+      
+      const indented = '    '.repeat(indentLevel) + trimmed;
+      
+      if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>') && !trimmed.includes('</')) {
+        indentLevel++;
+      }
+      
+      return indented;
+    });
+    
+    return indentedLines.join('\n').trim();
+  } catch (error) {
+    throw new Error("Invalid XML content");
+  }
 };
 
 export const formatJSONContent = (content: string): string => {
@@ -166,32 +201,63 @@ export const findJSONPaths = (obj: any, currentPath: string = '', paths: string[
 };
 
 export const findXMLPaths = (xmlContent: string): string[] => {
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
-  const paths: string[] = [];
-  
-  const walkDOM = (node: Node, path: string = '') => {
-    if (node.nodeType === 1) { // Element node
-      const currentPath = path ? `${path}/${node.nodeName}` : node.nodeName;
-      paths.push(currentPath);
-      
-      // Add paths for attributes
-      const element = node as Element;
-      for (const attr of element.attributes) {
-        paths.push(`${currentPath}/@${attr.name}`);
-      }
-      
-      // Add paths for text content
-      if (element.textContent?.trim()) {
-        paths.push(`${currentPath}/text()`);
-      }
-      
-      for (const child of node.childNodes) {
-        walkDOM(child, currentPath);
-      }
+  try {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+    
+    // Check for parsing errors
+    const parseError = xmlDoc.querySelector("parsererror");
+    if (parseError) {
+      throw new Error("Invalid XML syntax");
     }
-  };
-  
-  walkDOM(xmlDoc.documentElement);
-  return [...new Set(paths)]; // Remove duplicates
+    
+    const paths: string[] = [];
+    
+    const walkDOM = (node: Node, path: string = '') => {
+      if (node.nodeType === 1) { // Element node
+        const element = node as Element;
+        const currentPath = path ? `${path}/${element.nodeName}` : element.nodeName;
+        
+        // Add the element path
+        paths.push(`/${currentPath}`);
+        
+        // Add paths for attributes
+        for (const attr of element.attributes) {
+          paths.push(`/${currentPath}/@${attr.name}`);
+        }
+        
+        // Check for text content (excluding whitespace-only text)
+        const textContent = element.textContent?.trim();
+        const hasOnlyTextContent = element.children.length === 0 && textContent;
+        
+        if (hasOnlyTextContent) {
+          paths.push(`/${currentPath}/text()`);
+          // Also add a path that includes the actual text value for easier matching
+          paths.push(`/${currentPath}[text()="${textContent}"]`);
+        }
+        
+        // Process child elements
+        for (const child of element.children) {
+          walkDOM(child, currentPath);
+        }
+        
+        // Add XPath-style paths for easier selection
+        if (textContent) {
+          paths.push(`//${element.nodeName}`);
+          paths.push(`//${element.nodeName}[contains(text(),"${textContent.substring(0, 20)}")]`);
+        }
+      }
+    };
+    
+    if (xmlDoc.documentElement) {
+      walkDOM(xmlDoc.documentElement);
+    }
+    
+    // Remove duplicates and sort
+    const uniquePaths = [...new Set(paths)];
+    return uniquePaths.sort();
+  } catch (error) {
+    console.error("Error parsing XML for path extraction:", error);
+    return [];
+  }
 };

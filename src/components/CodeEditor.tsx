@@ -45,16 +45,29 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
   }, []);
 
   const formatXML = () => {
+    if (!xmlContent.trim()) {
+      toast.error("No XML content to format!");
+      return;
+    }
+    
     try {
+      console.log("Formatting XML content:", xmlContent);
       const formatted = formatXMLContent(xmlContent);
+      console.log("Formatted XML result:", formatted);
       setXmlContent(formatted);
-      toast.success("XML formatted successfully in-place!");
+      toast.success("XML formatted and validated successfully!");
     } catch (error) {
-      toast.error("Invalid XML content!");
+      console.error("XML formatting error:", error);
+      toast.error("Invalid XML content! Please check your XML syntax.");
     }
   };
 
   const formatJSON = () => {
+    if (!jsonContent.trim()) {
+      toast.error("No JSON content to format!");
+      return;
+    }
+    
     try {
       const formatted = formatJSONContent(jsonContent);
       setJsonContent(formatted);
@@ -95,13 +108,17 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
       textarea.selectionEnd
     );
 
-    if (selected) {
-      setSelectedText(selected);
+    console.log("Text selected:", selected);
+
+    if (selected && selected.trim()) {
+      setSelectedText(selected.trim());
       setHasSelection(true);
       setCurrentEditor(type);
+      console.log("Selection set:", selected.trim(), "Editor:", type);
     } else {
       setHasSelection(false);
       setSelectedText('');
+      console.log("No selection");
     }
   };
 
@@ -109,10 +126,20 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
     try {
       let paths: string[] = [];
       if (type === 'json') {
+        if (!jsonContent.trim()) {
+          toast.error("No JSON content to search!");
+          return;
+        }
         const parsed = JSON.parse(jsonContent);
         paths = findJSONPaths(parsed);
       } else {
+        if (!xmlContent.trim()) {
+          toast.error("No XML content to search!");
+          return;
+        }
+        console.log("Searching XML paths for:", searchQuery);
         paths = findXMLPaths(xmlContent);
+        console.log("Found XML paths:", paths);
       }
 
       const searchLower = searchQuery.toLowerCase();
@@ -124,36 +151,78 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
 
       if (filtered.length === 0) {
         toast.info("No matching paths found");
+      } else {
+        toast.success(`Found ${filtered.length} matching paths`);
       }
     } catch (error) {
-      toast.error("Error searching paths");
+      console.error("Search error:", error);
+      toast.error("Error searching paths - please check your content format");
     }
   };
 
   const extractPath = () => {
+    if (!selectedText) {
+      toast.error("No text selected for path extraction");
+      return;
+    }
+
     try {
+      console.log("Extracting path for:", selectedText, "in editor:", currentEditor);
+      
       if (currentEditor === 'json') {
+        if (!jsonContent.trim()) {
+          toast.error("No JSON content available");
+          return;
+        }
         const parsed = JSON.parse(jsonContent);
         const paths = findJSONPaths(parsed);
-        const matchingPath = paths.find(path => path.endsWith(selectedText.trim()));
+        console.log("JSON paths found:", paths);
+        
+        // Try multiple matching strategies
+        let matchingPath = paths.find(path => {
+          const pathValue = path.split('.').pop() || '';
+          return pathValue === selectedText || path.includes(selectedText);
+        });
+        
         if (matchingPath) {
           setSelectedPath(matchingPath);
-          toast.success("Path extracted successfully!");
+          toast.success("JSON path extracted successfully!");
         } else {
-          toast.error("Couldn't find path for selection");
+          toast.error("Couldn't find path for the selected text");
         }
       } else {
+        if (!xmlContent.trim()) {
+          toast.error("No XML content available");
+          return;
+        }
+        console.log("Extracting XML path for:", selectedText);
         const paths = findXMLPaths(xmlContent);
-        const matchingPath = paths.find(path => path.endsWith(selectedText.trim()));
+        console.log("XML paths found:", paths);
+        
+        // Improved XML path matching
+        let matchingPath = paths.find(path => {
+          // Check if path ends with the selected text as an element name
+          const pathParts = path.split('/');
+          const lastElement = pathParts[pathParts.length - 1];
+          return lastElement === selectedText || 
+                 lastElement.includes(selectedText) ||
+                 path.includes(`/${selectedText}`) ||
+                 path.includes(selectedText);
+        });
+        
         if (matchingPath) {
           setSelectedPath(matchingPath);
-          toast.success("Path extracted successfully!");
+          toast.success("XML path extracted successfully!");
         } else {
-          toast.error("Couldn't find path for selection");
+          // If no direct match, try to construct a path
+          const constructedPath = `//${selectedText}`;
+          setSelectedPath(constructedPath);
+          toast.success("XPath generated based on selection!");
         }
       }
     } catch (error) {
-      toast.error("Error extracting path");
+      console.error("Path extraction error:", error);
+      toast.error("Error extracting path - please check your content format");
     }
   };
 
