@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Base64Tab from '@/components/tools/Base64Tab';
@@ -31,19 +30,16 @@ const Base64Converter = () => {
     }
 
     try {
-      // Check if this might be binary data
-      const isBinary = isBinaryContent(content);
+      // Always attempt to decode and show the result
+      const decoded = decodeFromBase64(content);
+      setEncodedContent(decoded);
+      setShowResult(true);
       
+      // Check if this might be binary data for informational purposes
+      const isBinary = isBinaryContent(content);
       if (isBinary) {
-        // For binary data, we can just display the first part and indicate it's binary
-        setEncodedContent("Binary content detected. Use 'Decode & Download' to save the file.");
-        setShowResult(true);
-        toast.success("Binary content detected. Use the download option to save the file.");
+        toast.success("Binary content decoded. You can view the raw content or use 'Decode & Download' to save as a file.");
       } else {
-        // For text data, proceed with normal decoding
-        const decoded = decodeFromBase64(content);
-        setEncodedContent(decoded);
-        setShowResult(true);
         toast.success("Content decoded successfully");
       }
     } catch (error: any) {
