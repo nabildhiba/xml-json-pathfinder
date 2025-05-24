@@ -125,13 +125,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
       
       setSelectedText(cleanedSelection);
       setHasSelection(true);
-      // Use the passed type parameter instead of assuming
       setCurrentEditor(type);
-      console.log("Cleaned selection set:", cleanedSelection, "Editor:", type);
+      console.log("Cleaned selection set:", cleanedSelection, "Editor:", type, "Has selection:", true);
     } else {
       setHasSelection(false);
       setSelectedText('');
-      console.log("No selection");
+      console.log("No selection - clearing selection state");
     }
   };
 

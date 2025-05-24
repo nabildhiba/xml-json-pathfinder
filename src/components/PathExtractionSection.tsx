@@ -24,6 +24,8 @@ const PathExtractionSection = ({
   foundPaths,
   onPathSelect
 }: PathExtractionSectionProps) => {
+  console.log("PathExtractionSection render - hasSelection:", hasSelection, "selectedPath:", selectedPath);
+  
   return (
     <div className="space-y-4">
       <div className="p-4 border rounded-md bg-gray-50">
