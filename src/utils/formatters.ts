@@ -9,12 +9,14 @@ export const formatXMLContent = (content: string): string => {
     if (parseError) {
       // Extract more specific error information
       const errorText = parseError.textContent || '';
-      if (errorText.includes('mismatched tag')) {
-        throw new Error("Mismatched XML tags - check your opening and closing tags match exactly");
+      console.log("XML parsing error:", errorText);
+      
+      if (errorText.includes('mismatched tag') || errorText.includes('Mismatched tag')) {
+        throw new Error("Mismatched XML tags - check your opening and closing tags match exactly (e.g., <From> should close with </From>, not </from>)");
       } else if (errorText.includes('not well-formed')) {
         throw new Error("XML is not well-formed - check for missing quotes, unclosed tags, or invalid characters");
       } else {
-        throw new Error("Invalid XML syntax - " + errorText.substring(0, 100));
+        throw new Error("Invalid XML syntax - " + errorText.substring(0, 150));
       }
     }
     
@@ -23,6 +25,11 @@ export const formatXMLContent = (content: string): string => {
     
     // Better formatting with proper indentation
     let formatted = serialized;
+    
+    // Remove XML declaration if it was added by the serializer
+    formatted = formatted.replace(/^<\?xml[^>]*\?>\s*/, '');
+    
+    // Add line breaks between tags
     formatted = formatted.replace(/></g, '>\n<');
     formatted = formatted.replace(/^\s*\n/gm, '');
     
@@ -48,6 +55,7 @@ export const formatXMLContent = (content: string): string => {
     
     return indentedLines.join('\n').trim();
   } catch (error) {
+    console.error("XML formatting error:", error);
     if (error instanceof Error) {
       throw error;
     }
