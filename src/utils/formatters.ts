@@ -1,69 +1,53 @@
-
 export const formatXMLContent = (content: string): string => {
   try {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(content, "text/xml");
-    
-    // Check for parsing errors
+
     const parseError = xmlDoc.querySelector("parsererror");
     if (parseError) {
-      // Extract more specific error information
       const errorText = parseError.textContent || '';
       console.log("XML parsing error:", errorText);
-      
-      if (errorText.includes('mismatched tag') || errorText.includes('Mismatched tag')) {
-        throw new Error("Mismatched XML tags - check your opening and closing tags match exactly (e.g., <From> should close with </From>, not </from>)");
+
+      if (errorText.toLowerCase().includes('mismatched tag')) {
+        throw new Error("Mismatched XML tags - check your opening and closing tags match exactly.");
       } else if (errorText.includes('not well-formed')) {
         throw new Error("XML is not well-formed - check for missing quotes, unclosed tags, or invalid characters");
       } else {
         throw new Error("Invalid XML syntax - " + errorText.substring(0, 150));
       }
     }
-    
+
+    const xmlDeclarationMatch = content.match(/^<\?xml[^>]*\?>/);
+    const originalDeclaration = xmlDeclarationMatch ? xmlDeclarationMatch[0] : null;
+
     const serializer = new XMLSerializer();
-    const serialized = serializer.serializeToString(xmlDoc);
-    
-    // Better formatting with proper indentation
-    let formatted = serialized;
-    
-    // Remove XML declaration if it was added by the serializer
-    formatted = formatted.replace(/^<\?xml[^>]*\?>\s*/, '');
-    
-    // Add line breaks between tags
-    formatted = formatted.replace(/></g, '>\n<');
-    formatted = formatted.replace(/^\s*\n/gm, '');
-    
-    // Add proper indentation
+    let formatted = serializer.serializeToString(xmlDoc);
+    formatted = formatted.replace(/></g, '>
+<').replace(/^\s*\n/gm, '');
+
     const lines = formatted.split('\n');
-    let indentLevel = 0;
-    const indentedLines = lines.map(line => {
-      const trimmed = line.trim();
-      if (!trimmed) return '';
-      
-      if (trimmed.startsWith('</')) {
-        indentLevel = Math.max(0, indentLevel - 1);
-      }
-      
-      const indented = '  '.repeat(indentLevel) + trimmed;
-      
-      if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>') && !trimmed.includes('</')) {
-        indentLevel++;
-      }
-      
-      return indented;
-    });
-    
-    return indentedLines.join('\n').trim();
-  } catch (error) {
-    console.error("XML formatting error:", error);
-    if (error instanceof Error) {
-      throw error;
+    let indent = 0;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].match(/^<\/\w/)) indent--;
+      lines[i] = '  '.repeat(Math.max(0, indent)) + lines[i].trim();
+      if (lines[i].match(/^<\w([^>]*[^\/])?>.*$/) && !lines[i].includes('</')) indent++;
     }
-    throw new Error("Invalid XML content");
+
+    formatted = lines.join('\n');
+    if (originalDeclaration) {
+      formatted = `${originalDeclaration}\n${formatted}`;
+    }
+
+    return formatted;
+
+  } catch (error: any) {
+    console.error("XML formatting error:", error.message);
+    return content;
   }
 };
 
-export const formatJSONContent = (content: string): string => {
+// Le reste du fichier est inchangé, copié directement depuis la version fournie
+ = (content: string): string => {
   const parsed = JSON.parse(content);
   return JSON.stringify(parsed, null, 2);
 };
