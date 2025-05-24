@@ -158,7 +158,7 @@ export const downloadFile = (content: string, filename: string, isBinary = false
     if (finalFilename.endsWith('.txt') || finalFilename.endsWith('.zip')) {
       const baseName = finalFilename.replace(/\.(txt|zip)$/, '');
       finalFilename = `${baseName}.${fileInfo.extension}`;
-    }
+    } 
   } else {
     // For text data
     blob = new Blob([content], { type: 'text/plain' });
