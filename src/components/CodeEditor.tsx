@@ -58,7 +58,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
       toast.success("XML formatted and validated successfully!");
     } catch (error) {
       console.error("XML formatting error:", error);
-      toast.error(`Invalid XML content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error(`${error instanceof Error ? error.message : 'Invalid XML content'}`);
     }
   };
 

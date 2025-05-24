@@ -1,3 +1,4 @@
+
 export const formatXMLContent = (content: string): string => {
   try {
     const parser = new DOMParser();
@@ -6,7 +7,15 @@ export const formatXMLContent = (content: string): string => {
     // Check for parsing errors
     const parseError = xmlDoc.querySelector("parsererror");
     if (parseError) {
-      throw new Error("Invalid XML syntax");
+      // Extract more specific error information
+      const errorText = parseError.textContent || '';
+      if (errorText.includes('mismatched tag')) {
+        throw new Error("Mismatched XML tags - check your opening and closing tags match exactly");
+      } else if (errorText.includes('not well-formed')) {
+        throw new Error("XML is not well-formed - check for missing quotes, unclosed tags, or invalid characters");
+      } else {
+        throw new Error("Invalid XML syntax - " + errorText.substring(0, 100));
+      }
     }
     
     const serializer = new XMLSerializer();
@@ -28,7 +37,7 @@ export const formatXMLContent = (content: string): string => {
         indentLevel = Math.max(0, indentLevel - 1);
       }
       
-      const indented = '    '.repeat(indentLevel) + trimmed;
+      const indented = '  '.repeat(indentLevel) + trimmed;
       
       if (trimmed.startsWith('<') && !trimmed.startsWith('</') && !trimmed.endsWith('/>') && !trimmed.includes('</')) {
         indentLevel++;
@@ -39,6 +48,9 @@ export const formatXMLContent = (content: string): string => {
     
     return indentedLines.join('\n').trim();
   } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error("Invalid XML content");
   }
 };
