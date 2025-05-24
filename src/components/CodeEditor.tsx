@@ -32,6 +32,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
   const [selectedText, setSelectedText] = useState('');
   const [currentEditor, setCurrentEditor] = useState<'xml' | 'json'>('xml');
   const [showResult, setShowResult] = useState(false);
+  const [activeTab, setActiveTab] = useState<'xml' | 'json' | 'encodeDecode'>(defaultTab);
 
   useEffect(() => {
     try {
@@ -108,7 +109,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
       textarea.selectionEnd
     );
 
-    console.log("Text selected:", selected);
+    console.log("Text selected:", selected, "Type:", type, "Active tab:", activeTab);
 
     if (selected && selected.trim()) {
       let cleanedSelection = selected.trim();
@@ -124,6 +125,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
       
       setSelectedText(cleanedSelection);
       setHasSelection(true);
+      // Use the passed type parameter instead of assuming
       setCurrentEditor(type);
       console.log("Cleaned selection set:", cleanedSelection, "Editor:", type);
     } else {
@@ -302,6 +304,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         onJSONContentChange={setJsonContent}
         onTextSelect={handleTextSelect}
         defaultTab={defaultTab}
+        onTabChange={setActiveTab}
       />
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { FileCode, Code, RefreshCw } from "lucide-react";
@@ -29,6 +28,7 @@ interface ToolsTabsProps {
   onJSONContentChange: (content: string) => void;
   onTextSelect: (e: React.MouseEvent<HTMLTextAreaElement>, type: 'xml' | 'json') => void;
   defaultTab?: 'xml' | 'json' | 'encodeDecode';
+  onTabChange?: (tab: 'xml' | 'json' | 'encodeDecode') => void;
 }
 
 const ToolsTabs: React.FC<ToolsTabsProps> = ({
@@ -52,6 +52,7 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
   onJSONContentChange,
   onTextSelect,
   defaultTab = 'xml',
+  onTabChange,
 }) => {
   const location = useLocation();
   
@@ -61,17 +62,23 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
     if (location.pathname === '/base64-encoder-decoder') return 'encodeDecode';
     return defaultTab;
   };
+
+  const handleTabChange = (value: string) => {
+    if (onTabChange) {
+      onTabChange(value as 'xml' | 'json' | 'encodeDecode');
+    }
+  };
   
   return (
-    <Tabs defaultValue={determineActiveTab()} className="w-full">
+    <Tabs defaultValue={determineActiveTab()} className="w-full" onValueChange={handleTabChange}>
       <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-100 h-12">
-        <NavTabsTrigger value="xml" to="/xpath-tester" icon={<FileCode className="w-4 h-4" />}>
+        <NavTabsTrigger value="xml" to="/xpath-tester" icon={<FileCode className="w-4 h-4" />} >
           XML Beautifier & Path Finder
         </NavTabsTrigger>
-        <NavTabsTrigger value="json" to="/json-tester" icon={<Code className="w-4 h-4" />}>
+        <NavTabsTrigger value="json" to="/json-tester" icon={<Code className="w-4 h-4" />} >
           JSON Beautifier & Path Finder
         </NavTabsTrigger>
-        <NavTabsTrigger value="encodeDecode" to="/base64-encoder-decoder" icon={<RefreshCw className="w-4 h-4" />}>
+        <NavTabsTrigger value="encodeDecode" to="/base64-encoder-decoder" icon={<RefreshCw className="w-4 h-4" />} >
           Base64 Converter
         </NavTabsTrigger>
       </TabsList>
