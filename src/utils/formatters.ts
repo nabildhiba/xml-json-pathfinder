@@ -1,3 +1,4 @@
+
 export const formatXMLContent = (content: string): string => {
   try {
     const parser = new DOMParser();
@@ -20,10 +21,12 @@ export const formatXMLContent = (content: string): string => {
     const xmlDeclarationMatch = content.match(/^<\?xml[^>]*\?>/);
     const originalDeclaration = xmlDeclarationMatch ? xmlDeclarationMatch[0] : null;
 
-    const serializer = new XMLSerializer();
-    let formatted = serializer.serializeToString(xmlDoc).replace(/></g, '>\n<').replace(/^\s*\n/gm, '');
+    let formatted = new XMLSerializer()
+      .serializeToString(xmlDoc)
+      .replace(/></g, '>\\n<')
+      .replace(/^\s*\\n/gm, '');
 
-    const lines = formatted.split('\n');
+    const lines = formatted.split('\\n');
     let indent = 0;
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].match(/^<\/\w/)) indent--;
@@ -31,21 +34,19 @@ export const formatXMLContent = (content: string): string => {
       if (lines[i].match(/^<\w([^>]*[^\/])?>.*$/) && !lines[i].includes('</')) indent++;
     }
 
-    formatted = lines.join('\n');
+    formatted = lines.join('\\n');
     if (originalDeclaration) {
-      formatted = `${originalDeclaration}\n${formatted}`;
+      formatted = `${originalDeclaration}\\n${formatted}`;
     }
 
     return formatted;
-
   } catch (error: any) {
     console.error("XML formatting error:", error.message);
     return content;
   }
 };
 
-// Le reste du fichier est inchangé, copié directement depuis la version fournie
- = (content: string): string => {
+export const formatJSONContent = (content: string): string => {
   const parsed = JSON.parse(content);
   return JSON.stringify(parsed, null, 2);
 };
