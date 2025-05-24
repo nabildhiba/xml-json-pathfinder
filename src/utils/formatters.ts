@@ -21,8 +21,7 @@ export const formatXMLContent = (content: string): string => {
     const originalDeclaration = xmlDeclarationMatch ? xmlDeclarationMatch[0] : null;
 
     const serializer = new XMLSerializer();
-    let formatted = serializer.serializeToString(xmlDoc).replace(/></g, '>
-<').replace(/^\s*\n/gm, '');
+    let formatted = serializer.serializeToString(xmlDoc).replace(/></g, '>\n<').replace(/^\s*\n/gm, '');
 
     const lines = formatted.split('\n');
     let indent = 0;
