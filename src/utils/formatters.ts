@@ -21,8 +21,7 @@ export const formatXMLContent = (content: string): string => {
     const originalDeclaration = xmlDeclarationMatch ? xmlDeclarationMatch[0] : null;
 
     const serializer = new XMLSerializer();
-    let formatted = serializer.serializeToString(xmlDoc);
-    formatted = formatted.replace(/></g, '>
+    let formatted = serializer.serializeToString(xmlDoc).replace(/></g, '>
 <').replace(/^\s*\n/gm, '');
 
     const lines = formatted.split('\n');
@@ -158,7 +157,7 @@ export const downloadFile = (content: string, filename: string, isBinary = false
     if (finalFilename.endsWith('.txt') || finalFilename.endsWith('.zip')) {
       const baseName = finalFilename.replace(/\.(txt|zip)$/, '');
       finalFilename = `${baseName}.${fileInfo.extension}`;
-    } 
+    }
   } else {
     // For text data
     blob = new Blob([content], { type: 'text/plain' });
