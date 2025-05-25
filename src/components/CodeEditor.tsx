@@ -224,7 +224,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
           pathLower.includes(`[text()="${sel}"]`) ||        // contenu texte
           pathLower.includes(`[contains(text(),"${sel}")]`) // contenu partiel
         );
-        
+      });
         if (!matchingPath) {
           // Try a more flexible search for element names
           matchingPath = paths.find(path => 
