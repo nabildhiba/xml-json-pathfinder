@@ -1,5 +1,4 @@
 
-
 export const formatXMLContent = (content: string): string => {
   try {
     const parser = new DOMParser();
@@ -7,37 +6,56 @@ export const formatXMLContent = (content: string): string => {
 
     const parseError = xmlDoc.querySelector("parsererror");
     if (parseError) {
-      const errorText = parseError.textContent || '';
-      throw new Error("Invalid XML: " + errorText);
+      throw new Error("Invalid XML");
     }
 
     const originalDeclaration = '<?xml version="1.0" encoding="UTF-8"?>';
 
-    let serialized = new XMLSerializer().serializeToString(xmlDoc);
+    const beautify = (node: Node, indent: string = ''): string => {
+      let xml = '';
 
-    // Supprime la déclaration XML auto-générée si présente
-    if (serialized.startsWith('<?xml')) {
-      serialized = serialized.replace(/^<\?xml[^>]*>\s*/, '');
-    }
+      const children = Array.from(node.childNodes);
+      const hasElementChildren = children.some(n => n.nodeType === 1);
 
-    // 🔁 Ajoute un vrai retour à la ligne entre les balises collées
-    let formatted = serialized.replace(/></g, '>\n<').replace(/^\s*\n/gm, '');
+      if (node.nodeType === 1) {
+        const el = node as Element;
+        const tagName = el.tagName;
+        const attrs = Array.from(el.attributes)
+          .map(attr => ` ${attr.name}="${attr.value}"`)
+          .join('');
 
-    const lines = formatted.split('\n');
-    let indent = 0;
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].match(/^<\/\w/)) indent--;
-      lines[i] = '  '.repeat(Math.max(0, indent)) + lines[i].trim();
-      if (lines[i].match(/^<\w([^>]*[^\/])?>.*$/) && !lines[i].includes('</')) indent++;
-    }
+        if (!hasElementChildren && !el.textContent?.trim()) {
+          xml += `${indent}<${tagName}${attrs}/>\n`;
+        } else if (!hasElementChildren) {
+          xml += `${indent}<${tagName}${attrs}>${el.textContent?.trim()}</${tagName}>\n`;
+        } else {
+          xml += `${indent}<${tagName}${attrs}>\n`;
+          for (const child of children) {
+            xml += beautify(child, indent + '  ');
+          }
+          xml += `${indent}</${tagName}>\n`;
+        }
+      } else if (node.nodeType === 3) {
+        const text = node.textContent?.trim();
+        if (text) {
+          xml += `${indent}${text}\n`;
+        }
+      }
 
-    formatted = lines.join('\n');
+      return xml;
+    };
+
+    const root = xmlDoc.documentElement;
+    const formatted = beautify(root).trim();
+
     return `${originalDeclaration}\n${formatted}`;
   } catch (error: any) {
     console.error("XML formatting error:", error.message);
     return content;
   }
 };
+
+
 export const formatJSONContent = (content: string): string => {
   const parsed = JSON.parse(content);
   return JSON.stringify(parsed, null, 2);
