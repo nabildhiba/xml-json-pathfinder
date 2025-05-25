@@ -225,7 +225,13 @@ export const findXMLPaths = (xmlContent: string): string[] => {
       const currentPath = path ? `${path}/${element.nodeName}` : `/${element.nodeName}`;
       paths.push(currentPath);
 
-      // Add path to text() if relevant
+      // 🎯 ATTRIBUTS
+      Array.from(element.attributes).forEach(attr => {
+        paths.push(`${currentPath}/@${attr.name}`);
+        paths.push(`${currentPath}[@${attr.name}="${attr.value}"]`);
+      });
+
+      // 🎯 TEXT CONTENT
       const text = element.textContent?.trim();
       if (text) {
         paths.push(`${currentPath}[text()="${text}"]`);
