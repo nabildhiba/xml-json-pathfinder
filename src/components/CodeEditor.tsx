@@ -211,25 +211,20 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         const paths = findXMLPaths(xmlContent);
         console.log("XML paths found:", paths);
         
-        // Improved XML path matching with multiple strategies
-        let matchingPath = paths.find(path => {
-          const pathParts = path.split('/');
-          const lastElement = pathParts[pathParts.length - 1];
-          
-          // Direct element name match
-          if (lastElement === selectedText) return true;
-          
-          // Check if path contains the selected text as an element
-          if (path.includes(`/${selectedText}`)) return true;
-          
-          // Check for text content matches
-          if (path.includes(`[text()="${selectedText}"]`)) return true;
-          
-          // Check for partial text content matches
-          if (path.includes(`[contains(text(),"${selectedText}")]`)) return true;
-          
-          return false;
-        });
+      let matchingPath = paths.find(path => {
+          const lowerSel = selectedText.toLowerCase();
+          const pathLower = path.toLowerCase();
+      
+          return (
+              pathLower.endsWith(`/${lowerSel}`) || // tag name exact match
+              pathLower.includes(`/${lowerSel}`) || // tag name anywhere
+              pathLower.includes(`@${lowerSel}`) || // attribute name
+              pathLower.includes(`="${lowerSel}"`) || // attribute value exact match
+              pathLower.includes(`"${lowerSel}"`) || // quoted value
+              pathLower.includes(`[text()="${lowerSel}"]`) || // exact text node
+              pathLower.includes(`[contains(text(),"${lowerSel}")]`) // partial text node
+          );
+      });
         
         if (!matchingPath) {
           // Try a more flexible search for element names
