@@ -212,19 +212,18 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         console.log("XML paths found:", paths);
         
       let matchingPath = paths.find(path => {
-          const lowerSel = selectedText.toLowerCase();
-          const pathLower = path.toLowerCase();
+        const sel = selectedText.trim().replace(/^['"]|['"]$/g, '').toLowerCase(); // nettoie guillemets
+        const pathLower = path.toLowerCase();
       
-          return (
-              pathLower.endsWith(`/${lowerSel}`) || // tag name exact match
-              pathLower.includes(`/${lowerSel}`) || // tag name anywhere
-              pathLower.includes(`@${lowerSel}`) || // attribute name
-              pathLower.includes(`="${lowerSel}"`) || // attribute value exact match
-              pathLower.includes(`"${lowerSel}"`) || // quoted value
-              pathLower.includes(`[text()="${lowerSel}"]`) || // exact text node
-              pathLower.includes(`[contains(text(),"${lowerSel}")]`) // partial text node
-          );
-      });
+        return (
+          pathLower.endsWith(`/${sel}`) ||                  // balise
+          pathLower.includes(`/${sel}`) ||                  // balise partielle
+          pathLower.includes(`@${sel}`) ||                  // nom d'attribut
+          pathLower.includes(`="${sel}"`) ||                // valeur exacte
+          pathLower.includes(`="${sel.toLowerCase()}"`) ||  // valeur minuscule
+          pathLower.includes(`[text()="${sel}"]`) ||        // contenu texte
+          pathLower.includes(`[contains(text(),"${sel}")]`) // contenu partiel
+        );
         
         if (!matchingPath) {
           // Try a more flexible search for element names
