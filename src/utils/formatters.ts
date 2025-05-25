@@ -7,27 +7,20 @@ export const formatXMLContent = (content: string): string => {
     const parseError = xmlDoc.querySelector("parsererror");
     if (parseError) {
       const errorText = parseError.textContent || '';
-      console.log("XML parsing error:", errorText);
-
-      if (errorText.toLowerCase().includes('mismatched tag')) {
-        throw new Error("Mismatched XML tags - check your opening and closing tags match exactly.");
-      } else if (errorText.includes('not well-formed')) {
-        throw new Error("XML is not well-formed - check for missing quotes, unclosed tags, or invalid characters");
-      } else {
-        throw new Error("Invalid XML syntax - " + errorText.substring(0, 150));
-      }
+      console.error("XML parsing error:", errorText);
+      throw new Error("Invalid XML syntax");
     }
 
-    const xmlDeclarationMatch = content.match(/^<\?xml[^>]*\?>/);
-    const originalDeclaration = xmlDeclarationMatch ? xmlDeclarationMatch[0] : null;
+    const xmlDeclarationMatch = content.match(/^<\\?xml[^>]*\\?>/);
+    const originalDeclaration = xmlDeclarationMatch ? xmlDeclarationMatch[0] : '<?xml version="1.0" encoding="UTF-8"?>';
 
     let formatted = new XMLSerializer()
       .serializeToString(xmlDoc)
-      .replace(/^<\?xml[^>]*>\s*/, '')
-      .replace(/></g, '>\\n<')
-      .replace(/^\s*\\n/gm, '');
+      .replace(/^<\\?xml[^>]*>\\s*/, '')
+      .replace(/></g, '>\n<')
+      .replace(/^\s*\n/gm, '');
 
-    const lines = formatted.split('\\n');
+    const lines = formatted.split('\n');
     let indent = 0;
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].match(/^<\/\w/)) indent--;
@@ -35,12 +28,10 @@ export const formatXMLContent = (content: string): string => {
       if (lines[i].match(/^<\w([^>]*[^\/])?>.*$/) && !lines[i].includes('</')) indent++;
     }
 
-    formatted = lines.join('\\n');
-    if (originalDeclaration) {
-      formatted = `${originalDeclaration}\\n${formatted}`;
-    }
+    formatted = lines.join('\n');
 
-    return formatted;
+    // ✅ Insère un vrai saut de ligne, pas "\\n"
+    return `${originalDeclaration}\n${formatted}`;
   } catch (error: any) {
     console.error("XML formatting error:", error.message);
     return content;
