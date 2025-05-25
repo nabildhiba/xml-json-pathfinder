@@ -1,4 +1,3 @@
-
 export const formatXMLContent = (content: string): string => {
   try {
     const parser = new DOMParser();
@@ -7,18 +6,19 @@ export const formatXMLContent = (content: string): string => {
     const parseError = xmlDoc.querySelector("parsererror");
     if (parseError) {
       const errorText = parseError.textContent || '';
-      console.error("XML parsing error:", errorText);
-      throw new Error("Invalid XML syntax");
+      throw new Error("Invalid XML: " + errorText);
     }
 
-    const xmlDeclarationMatch = content.match(/^<\\?xml[^>]*\\?>/);
-    const originalDeclaration = xmlDeclarationMatch ? xmlDeclarationMatch[0] : '<?xml version="1.0" encoding="UTF-8"?>';
+    const originalDeclaration = '<?xml version="1.0" encoding="UTF-8"?>';
 
-    let formatted = new XMLSerializer()
-      .serializeToString(xmlDoc)
-      .replace(/^<\\?xml[^>]*>\\s*/, '')
-      .replace(/></g, '>\n<')
-      .replace(/^\s*\n/gm, '');
+    let serialized = new XMLSerializer().serializeToString(xmlDoc);
+
+    // Supprime la déclaration XML auto-générée si présente
+    if (serialized.startsWith('<?xml')) {
+      serialized = serialized.replace(/^<\?xml[^>]*>\s*/, '');
+    }
+
+    let formatted = serialized.replace(/></g, '>\n<').replace(/^\s*\n/gm, '');
 
     const lines = formatted.split('\n');
     let indent = 0;
@@ -29,8 +29,6 @@ export const formatXMLContent = (content: string): string => {
     }
 
     formatted = lines.join('\n');
-
-    // ✅ Insère un vrai saut de ligne, pas "\\n"
     return `${originalDeclaration}\n${formatted}`;
   } catch (error: any) {
     console.error("XML formatting error:", error.message);
