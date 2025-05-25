@@ -214,73 +214,30 @@ export const findJSONPaths = (obj: any, currentPath: string = '', paths: string[
 };
 
 export const findXMLPaths = (xmlContent: string): string[] => {
-  try {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
-    
-    // Check for parsing errors
-    const parseError = xmlDoc.querySelector("parsererror");
-    if (parseError) {
-      throw new Error("Invalid XML syntax");
-    }
-    
-    const paths: string[] = [];
-    
-    const walkDOM = (node: Node, path: string = '') => {
-      if (node.nodeType === 1) { // Element node
-        const element = node as Element;
-        const currentPath = path ? `${path}/${element.nodeName}` : element.nodeName;
-        
-        // Add the element path
-        paths.push(`/${currentPath}`);
-        
-        // Add paths for attributes
-        for (const attr of element.attributes) {
-          paths.push(`/${currentPath}/@${attr.name}`);
-        }
-        
-        // Check for text content (excluding whitespace-only text)
-        const textContent = element.textContent?.trim();
-        const hasOnlyTextContent = element.children.length === 0 && textContent;
-        
-        if (hasOnlyTextContent) {
-          paths.push(`/${currentPath}/text()`);
-          // Also add a path that includes the actual text value for easier matching
-          paths.push(`/${currentPath}[text()="${textContent}"]`);
-          // Add contains version for partial matches
-          if (textContent.length > 10) {
-            paths.push(`/${currentPath}[contains(text(),"${textContent.substring(0, 20)}")]`);
-          }
-        }
-        
-        // Process child elements
-        for (const child of element.children) {
-          walkDOM(child, currentPath);
-        }
-        
-        // Add XPath-style paths for easier selection
-        paths.push(`//${element.nodeName}`);
-        
-        // Add indexed paths for elements with same names
-        const siblings = element.parentElement ? 
-          Array.from(element.parentElement.children).filter(child => child.nodeName === element.nodeName) : [];
-        if (siblings.length > 1) {
-          const index = siblings.indexOf(element) + 1;
-          paths.push(`/${currentPath}[${index}]`);
-          paths.push(`//${element.nodeName}[${index}]`);
-        }
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlContent, "text/xml");
+
+  const paths: string[] = [];
+
+  const traverse = (node: Node, path: string) => {
+    if (node.nodeType === 1) { // Element node
+      const element = node as Element;
+      const currentPath = path ? `${path}/${element.nodeName}` : `/${element.nodeName}`;
+      paths.push(currentPath);
+
+      // Add path to text() if relevant
+      const text = element.textContent?.trim();
+      if (text) {
+        paths.push(`${currentPath}[text()="${text}"]`);
+        paths.push(`${currentPath}[contains(text(),"${text.substring(0, 10)}")]`);
       }
-    };
-    
-    if (xmlDoc.documentElement) {
-      walkDOM(xmlDoc.documentElement);
+
+      Array.from(element.children).forEach(child => {
+        traverse(child, currentPath);
+      });
     }
-    
-    // Remove duplicates and sort
-    const uniquePaths = [...new Set(paths)];
-    return uniquePaths.sort();
-  } catch (error) {
-    console.error("Error parsing XML for path extraction:", error);
-    return [];
-  }
+  };
+
+  traverse(xmlDoc.documentElement, '');
+  return paths;
 };

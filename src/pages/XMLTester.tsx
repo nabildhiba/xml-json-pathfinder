@@ -126,9 +126,7 @@ const XMLTester = () => {
           setSelectedPath(matchingPath);
           toast.success("XML path extracted successfully!");
         } else {
-          const constructedPath = `//${selectedText}`;
-          setSelectedPath(constructedPath);
-          toast.success("XPath generated based on selection!");
+          toast.error("Could not find exact path for selected text");
         }
       }
     } catch (error) {

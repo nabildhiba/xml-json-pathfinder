@@ -242,10 +242,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
           setSelectedPath(matchingPath);
           toast.success("XML path extracted successfully!");
         } else {
-          // Generate a simple XPath for the element
-          const constructedPath = `//${selectedText}`;
-          setSelectedPath(constructedPath);
-          toast.success("XPath generated based on selection!");
+          toast.error("Could not find exact path for selected text");
         }
       }
     } catch (error) {
