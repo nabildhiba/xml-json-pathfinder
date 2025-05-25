@@ -24,13 +24,10 @@ export const formatXMLContent = (content: string): string => {
     let formatted = new XMLSerializer()
       .serializeToString(xmlDoc)
       .replace(/^<\?xml[^>]*>\s*/, '')
-      .replace(/></g, '>
-<')
-      .replace(/^\s*
-/gm, '');
+      .replace(/></g, '>\\n<')
+      .replace(/^\s*\\n/gm, '');
 
-    const lines = formatted.split('
-');
+    const lines = formatted.split('\\n');
     let indent = 0;
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].match(/^<\/\w/)) indent--;
@@ -38,11 +35,9 @@ export const formatXMLContent = (content: string): string => {
       if (lines[i].match(/^<\w([^>]*[^\/])?>.*$/) && !lines[i].includes('</')) indent++;
     }
 
-    formatted = lines.join('
-');
+    formatted = lines.join('\\n');
     if (originalDeclaration) {
-      formatted = `${originalDeclaration}
-${formatted}`;
+      formatted = `${originalDeclaration}\\n${formatted}`;
     }
 
     return formatted;
