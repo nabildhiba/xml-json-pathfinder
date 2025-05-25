@@ -20,12 +20,9 @@ export const formatXMLContent = (content: string): string => {
       serialized = serialized.replace(/^<\?xml[^>]*>\s*/, '');
     }
 
-    let formatted = serialized.replace(/></g, '>
-<').replace(/^\s*
-/gm, '');
+    let formatted = serialized.replace(/></g, '>\\n<').replace(/^\\s*\\n/gm, '');
 
-    const lines = formatted.split('
-');
+    const lines = formatted.split('\\n');
     let indent = 0;
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].match(/^<\/\w/)) indent--;
@@ -33,10 +30,8 @@ export const formatXMLContent = (content: string): string => {
       if (lines[i].match(/^<\w([^>]*[^\/])?>.*$/) && !lines[i].includes('</')) indent++;
     }
 
-    formatted = lines.join('
-');
-    return `${originalDeclaration}
-${formatted}`;
+    formatted = lines.join('\\n');
+    return `${originalDeclaration}\n${formatted}`;
   } catch (error: any) {
     console.error("XML formatting error:", error.message);
     return content;
