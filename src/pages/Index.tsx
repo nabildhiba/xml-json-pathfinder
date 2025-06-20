@@ -75,6 +75,17 @@ const Index = () => {
             <CardContent className="pt-6">
               <div className="flex items-center gap-2 mb-4">
                 <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">What Is XML? Explained Simply</h3>
+              </div>
+              <p className="text-gray-600 mb-4">Understand XML basics with beginner-friendly examples and learn where it's still used today.</p>
+              <Link to="/what-is-xml" className="text-primary hover:underline">Read Guide →</Link>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold">JSON vs XML: What's the Difference?</h3>
               </div>
               <p className="text-gray-600 mb-4">Understand the differences between JSON and XML with practical examples and use cases.</p>
