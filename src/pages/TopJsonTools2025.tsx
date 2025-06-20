@@ -74,16 +74,18 @@ const TopJsonTools2025 = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4">5. <a href="https://www.jsonformatter.io" target="_blank" rel="nofollow" className="text-primary hover:underline">JSONFormatter.io</a> – Best Minimalist Formatter</h2>
+          <h2 className="text-2xl font-semibold mb-4">5. <a href="https://www.freeformatter.com/json-formatter.html" target="_blank" rel="nofollow" className="text-primary hover:underline">FreeFormatter JSON Formatter</a> – Best Lightweight JSON Beautifier</h2>
           <p className="text-gray-700 mb-4">
-            A clean, focused tool for developers who want fast formatting without extra features. Includes beautify, minify, and copy options.
+            <strong>FreeFormatter</strong> propose un outil simple et rapide pour formater, compacter ou valider du JSON. Il est idéal pour ceux qui veulent un outil propre sans options complexes.
           </p>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>✅ Extremely fast</li>
-            <li>✅ Minimal distractions</li>
-            <li>❌ Lacks tree view or conversion features</li>
+            <li>✅ Formatage (beautify) et compression (minify) du JSON</li>
+            <li>✅ Affichage des erreurs de syntaxe</li>
+            <li>❌ Pas de vue arborescente interactive</li>
+            <li>❌ Interface très basique</li>
           </ul>
         </section>
+
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Which JSON Tool Should You Use?</h2>
