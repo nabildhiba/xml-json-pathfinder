@@ -13,6 +13,7 @@ import JsonVsXml from "./pages/JsonVsXml";
 import WhatIsJson from "./pages/WhatIsJson";
 import WhatIsXml from "./pages/WhatIsXml";
 import JsonWebApisHistory from "./pages/JsonWebApisHistory";
+import TopJsonTools2025 from "./pages/TopJsonTools2025";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/what-is-json" element={<WhatIsJson />} />
           <Route path="/what-is-xml" element={<WhatIsXml />} />
           <Route path="/json-web-apis-history" element={<JsonWebApisHistory />} />
+          <Route path="/top-json-tools-2025" element={<TopJsonTools2025 />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

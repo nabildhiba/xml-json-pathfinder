@@ -103,6 +103,17 @@ const Index = () => {
               <Link to="/json-web-apis-history" className="text-primary hover:underline">Read Article →</Link>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Top 5 JSON Tools You Should Be Using in 2025</h3>
+              </div>
+              <p className="text-gray-600 mb-4">Discover the best free JSON tools available in 2025. Explore formatters, validators, converters and more.</p>
+              <Link to="/top-json-tools-2025" className="text-primary hover:underline">Read Article →</Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
