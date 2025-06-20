@@ -1,4 +1,3 @@
-
 import React from 'react';
 import CodeEditor from "@/components/CodeEditor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -60,16 +59,29 @@ const Index = () => {
 
       <div className="mb-12">
         <h2 className="text-2xl font-semibold mb-6">Learn More</h2>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-4">
-              <BookOpen className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">JSON vs XML: What's the Difference?</h3>
-            </div>
-            <p className="text-gray-600 mb-4">Understand the differences between JSON and XML with practical examples and use cases.</p>
-            <Link to="/json-vs-xml" className="text-primary hover:underline">Read Guide →</Link>
-          </CardContent>
-        </Card>
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">What Is JSON? A Beginner's Guide</h3>
+              </div>
+              <p className="text-gray-600 mb-4">Learn the basics of JSON with simple examples and practical use cases.</p>
+              <Link to="/what-is-json" className="text-primary hover:underline">Read Guide →</Link>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">JSON vs XML: What's the Difference?</h3>
+              </div>
+              <p className="text-gray-600 mb-4">Understand the differences between JSON and XML with practical examples and use cases.</p>
+              <Link to="/json-vs-xml" className="text-primary hover:underline">Read Guide →</Link>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="mt-12 mb-16">
