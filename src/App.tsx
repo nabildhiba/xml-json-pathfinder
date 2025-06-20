@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import XMLTester from "./pages/XMLTester";
 import JSONTester from "./pages/JSONTester";
 import Base64Converter from "./pages/Base64Converter";
+import JsonVsXml from "./pages/JsonVsXml";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/xpath-tester" element={<XMLTester />} />
           <Route path="/json-tester" element={<JSONTester />} />
           <Route path="/base64-encoder-decoder" element={<Base64Converter />} />
+          <Route path="/json-vs-xml" element={<JsonVsXml />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

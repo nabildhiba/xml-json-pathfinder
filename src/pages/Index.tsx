@@ -1,9 +1,10 @@
+
 import React from 'react';
 import CodeEditor from "@/components/CodeEditor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { FileJson, FileCode, RefreshCw } from "lucide-react";
+import { FileJson, FileCode, RefreshCw, BookOpen } from "lucide-react";
 
 const Index = () => {
   return (
@@ -55,6 +56,20 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      <div className="mb-12">
+        <h2 className="text-2xl font-semibold mb-6">Learn More</h2>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold">JSON vs XML: What's the Difference?</h3>
+            </div>
+            <p className="text-gray-600 mb-4">Understand the differences between JSON and XML with practical examples and use cases.</p>
+            <Link to="/json-vs-xml" className="text-primary hover:underline">Read Guide →</Link>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="mt-12 mb-16">
