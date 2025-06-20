@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import JSONTester from "./pages/JSONTester";
 import Base64Converter from "./pages/Base64Converter";
 import JsonVsXml from "./pages/JsonVsXml";
 import WhatIsJson from "./pages/WhatIsJson";
+import JsonWebApisHistory from "./pages/JsonWebApisHistory";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +27,7 @@ const App = () => (
           <Route path="/base64-encoder-decoder" element={<Base64Converter />} />
           <Route path="/json-vs-xml" element={<JsonVsXml />} />
           <Route path="/what-is-json" element={<WhatIsJson />} />
+          <Route path="/json-web-apis-history" element={<JsonWebApisHistory />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

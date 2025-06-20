@@ -81,6 +81,17 @@ const Index = () => {
               <Link to="/json-vs-xml" className="text-primary hover:underline">Read Guide →</Link>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">How JSON Changed Web APIs</h3>
+              </div>
+              <p className="text-gray-600 mb-4">Discover how JSON revolutionized web development and replaced XML in modern APIs.</p>
+              <Link to="/json-web-apis-history" className="text-primary hover:underline">Read Article →</Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
