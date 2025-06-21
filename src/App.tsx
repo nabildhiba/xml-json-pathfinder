@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import WhatIsXml from "./pages/WhatIsXml";
 import JsonWebApisHistory from "./pages/JsonWebApisHistory";
 import TopJsonTools2025 from "./pages/TopJsonTools2025";
 import JsonApiSecurityBestPractices from "./pages/JsonApiSecurityBestPractices";
+import JsonVulnerabilities from "./pages/JsonVulnerabilities";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +35,7 @@ const App = () => (
           <Route path="/json-web-apis-history" element={<JsonWebApisHistory />} />
           <Route path="/top-json-tools-2025" element={<TopJsonTools2025 />} />
           <Route path="/json-api-security-best-practices" element={<JsonApiSecurityBestPractices />} />
+          <Route path="/json-vulnerabilities" element={<JsonVulnerabilities />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

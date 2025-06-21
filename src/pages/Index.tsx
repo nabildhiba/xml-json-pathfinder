@@ -125,6 +125,17 @@ const Index = () => {
               <Link to="/json-api-security-best-practices" className="text-primary hover:underline">Read Guide →</Link>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">Common JSON Vulnerabilities Every Developer Should Know</h3>
+              </div>
+              <p className="text-gray-600 mb-4">Discover the most common JSON vulnerabilities developers face when building APIs. Learn how to prevent injection, leaks, and parsing attacks.</p>
+              <Link to="/json-vulnerabilities" className="text-primary hover:underline">Read Guide →</Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
