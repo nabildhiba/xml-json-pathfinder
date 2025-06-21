@@ -114,6 +114,17 @@ const Index = () => {
               <Link to="/top-json-tools-2025" className="text-primary hover:underline">Read Article →</Link>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="font-semibold">JSON + REST APIs: Best Practices for Secure Data Exchange</h3>
+              </div>
+              <p className="text-gray-600 mb-4">Learn how to securely exchange data using JSON and REST APIs. Discover best practices for headers, validation, authentication, and more.</p>
+              <Link to="/json-api-security-best-practices" className="text-primary hover:underline">Read Guide →</Link>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
