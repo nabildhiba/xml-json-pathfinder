@@ -1,11 +1,18 @@
 
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import HomeButton from '@/components/HomeButton';
 import { Link } from 'react-router-dom';
 
 const JsonWebApisHistory = () => {
   return (
     <div className="min-h-screen bg-white relative">
+      <Helmet>
+        <title>How JSON Changed Web APIs: A Brief History | JSONXMLKit</title>
+        <meta name="description" content="Discover how JSON revolutionized web development and replaced XML in modern APIs. Learn about the evolution from SOAP to REST APIs." />
+        <link rel="canonical" href="https://jsonxmlkit.com/json-web-apis-history" />
+      </Helmet>
+      
       <HomeButton />
       
       <div className="container max-w-4xl mx-auto px-4 py-16">
