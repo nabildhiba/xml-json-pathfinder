@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import ToolsTabs from './tools/ToolsTabs';
@@ -150,9 +151,12 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         // Check if it's a modern path syntax query
         if (isModernPathSyntax(searchQuery)) {
           const result = evaluateJSONPath(parsed, searchQuery);
-          setPathResult(result);
+          setPathResult({
+            values: result.values || [],
+            path: result.path
+          });
           setSelectedPath(searchQuery);
-          toast.success(`Found ${result.values.length} matching values`);
+          toast.success(`Found ${result.values?.length || 0} matching values`);
           return;
         }
         
@@ -206,7 +210,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
       try {
         const parsed = JSON.parse(jsonContent);
         const result = evaluateJSONPath(parsed, path);
-        setPathResult(result);
+        setPathResult({
+          values: result.values || [],
+          path: result.path
+        });
       } catch (error) {
         console.error("Path evaluation error:", error);
       }

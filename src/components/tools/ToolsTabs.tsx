@@ -29,6 +29,7 @@ interface ToolsTabsProps {
   onTextSelect: (e: React.MouseEvent<HTMLTextAreaElement>, type: 'xml' | 'json') => void;
   defaultTab?: 'xml' | 'json' | 'encodeDecode';
   onTabChange?: (tab: 'xml' | 'json' | 'encodeDecode') => void;
+  pathResult?: { values: any[]; path: string } | null;
 }
 
 const ToolsTabs: React.FC<ToolsTabsProps> = ({
@@ -53,6 +54,7 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
   onTextSelect,
   defaultTab = 'xml',
   onTabChange,
+  pathResult,
 }) => {
   const location = useLocation();
   
@@ -120,6 +122,7 @@ const ToolsTabs: React.FC<ToolsTabsProps> = ({
           onFormat={onFormatJSON}
           onContentChange={onJSONContentChange}
           onTextSelect={(e) => onTextSelect(e, 'json')}
+          pathResult={pathResult}
         />
       </TabsContent>
 
