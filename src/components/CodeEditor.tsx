@@ -7,7 +7,9 @@ import {
   encodeToBase64,
   decodeFromBase64,
   findJSONPaths,
-  findXMLPaths
+  findXMLPaths,
+  evaluateJSONPath,
+  isModernPathSyntax
 } from '@/utils/formatters';
 
 declare global {
@@ -33,6 +35,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
   const [currentEditor, setCurrentEditor] = useState<'xml' | 'json'>('xml');
   const [showResult, setShowResult] = useState(false);
   const [activeTab, setActiveTab] = useState<'xml' | 'json' | 'encodeDecode'>(defaultTab);
+  const [pathResult, setPathResult] = useState<{ values: any[]; path: string } | null>(null);
 
   useEffect(() => {
     try {
@@ -136,39 +139,79 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
 
   const handleSearch = (type: 'xml' | 'json') => {
     try {
-      let paths: string[] = [];
       if (type === 'json') {
         if (!jsonContent.trim()) {
           toast.error("No JSON content to search!");
           return;
         }
+        
         const parsed = JSON.parse(jsonContent);
-        paths = findJSONPaths(parsed);
+        
+        // Check if it's a modern path syntax query
+        if (isModernPathSyntax(searchQuery)) {
+          const result = evaluateJSONPath(parsed, searchQuery);
+          setPathResult(result);
+          setSelectedPath(searchQuery);
+          toast.success(`Found ${result.values.length} matching values`);
+          return;
+        }
+        
+        // Regular path search
+        const paths = findJSONPaths(parsed);
+        const searchLower = searchQuery.toLowerCase();
+        const filtered = paths.filter(path =>
+          path.toLowerCase().includes(searchLower)
+        );
+        setFoundPaths(filtered);
+        setPathResult(null);
+        
+        if (filtered.length === 0) {
+          toast.info("No matching paths found");
+        } else {
+          toast.success(`Found ${filtered.length} matching paths`);
+        }
       } else {
         if (!xmlContent.trim()) {
           toast.error("No XML content to search!");
           return;
         }
         console.log("Searching XML paths for:", searchQuery);
-        paths = findXMLPaths(xmlContent);
+        const paths = findXMLPaths(xmlContent);
         console.log("Found XML paths:", paths);
-      }
 
-      const searchLower = searchQuery.toLowerCase();
-      const filtered = paths.filter(path =>
-        path.toLowerCase().includes(searchLower)
-      );
+        const searchLower = searchQuery.toLowerCase();
+        const filtered = paths.filter(path =>
+          path.toLowerCase().includes(searchLower)
+        );
 
-      setFoundPaths(filtered);
+        setFoundPaths(filtered);
 
-      if (filtered.length === 0) {
-        toast.info("No matching paths found");
-      } else {
-        toast.success(`Found ${filtered.length} matching paths`);
+        if (filtered.length === 0) {
+          toast.info("No matching paths found");
+        } else {
+          toast.success(`Found ${filtered.length} matching paths`);
+        }
       }
     } catch (error) {
       console.error("Search error:", error);
       toast.error("Error searching paths - please check your content format");
+    }
+  };
+
+  const handlePathSelect = (path: string) => {
+    setSelectedPath(path);
+    
+    // If it's a modern path syntax, evaluate it
+    if (isModernPathSyntax(path) && jsonContent.trim()) {
+      try {
+        const parsed = JSON.parse(jsonContent);
+        const result = evaluateJSONPath(parsed, path);
+        setPathResult(result);
+      } catch (error) {
+        console.error("Path evaluation error:", error);
+      }
+    } else {
+      setPathResult(null);
     }
   };
 
@@ -285,7 +328,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         onSearchQueryChange={setSearchQuery}
         onSearch={handleSearch}
         onExtractPath={extractPath}
-        onPathSelect={setSelectedPath}
+        onPathSelect={handlePathSelect}
         onFormatXML={formatXML}
         onFormatJSON={formatJSON}
         onEncode={handleEncode}
@@ -295,6 +338,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         onTextSelect={handleTextSelect}
         defaultTab={defaultTab}
         onTabChange={setActiveTab}
+        pathResult={pathResult}
       />
     </div>
   );

@@ -12,6 +12,7 @@ interface PathExtractionSectionProps {
   onExtractPath: () => void;
   foundPaths: string[];
   onPathSelect: (path: string) => void;
+  pathResult?: { values: any[]; path: string } | null;
 }
 
 const PathExtractionSection = ({
@@ -22,7 +23,8 @@ const PathExtractionSection = ({
   onSearch,
   onExtractPath,
   foundPaths,
-  onPathSelect
+  onPathSelect,
+  pathResult
 }: PathExtractionSectionProps) => {
   console.log("PathExtractionSection render - hasSelection:", hasSelection, "selectedPath:", selectedPath);
   
@@ -31,7 +33,7 @@ const PathExtractionSection = ({
       <div className="p-4 border rounded-md bg-gray-50">
         <h3 className="font-medium mb-2">Path Extraction</h3>
         <p className="text-sm text-gray-600 mb-4">
-          Select text in the editor to extract its path. The extracted path will appear below.
+          Select text in the editor to extract its path, or use modern syntax like <code>shop.products[].variants[].id</code> to get all matching values.
         </p>
         {hasSelection && (
           <Button onClick={onExtractPath} className="w-full mb-2">
@@ -41,12 +43,23 @@ const PathExtractionSection = ({
         <div className="p-3 border rounded bg-white">
           <code className="text-sm break-all">{selectedPath || 'No path selected'}</code>
         </div>
+        
+        {pathResult && pathResult.values && pathResult.values.length > 0 && (
+          <div className="mt-3 p-3 border rounded bg-blue-50">
+            <h4 className="font-medium text-sm mb-2">Path Results:</h4>
+            <div className="text-sm">
+              <code className="text-blue-800">
+                [{pathResult.values.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')}]
+              </code>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2">
         <input
           type="text"
-          placeholder="Search paths..."
+          placeholder="Search paths or use shop.products[].name syntax..."
           className="flex-1 px-3 py-2 border rounded-md"
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}

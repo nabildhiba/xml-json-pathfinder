@@ -1,4 +1,3 @@
-
 export const formatXMLContent = (content: string): string => {
   try {
     const parser = new DOMParser();
@@ -55,6 +54,9 @@ export const formatXMLContent = (content: string): string => {
   }
 };
 
+import { evaluateJSONPath, isModernPathSyntax, findMatchingPaths } from './jsonPathEvaluator';
+
+export { evaluateJSONPath, isModernPathSyntax };
 
 export const formatJSONContent = (content: string): string => {
   const parsed = JSON.parse(content);
@@ -190,27 +192,36 @@ export const findJSONPaths = (obj: any, currentPath: string = '', paths: string[
   }
 
   if (typeof obj === 'object') {
-    Object.entries(obj).forEach(([key, value]) => {
-      const newPath = currentPath ? `${currentPath}.${key}` : key;
-      // Add the key path itself
-      paths.push(newPath);
-      
-      if (Array.isArray(value)) {
-        value.forEach((item, index) => {
-          findJSONPaths(item, `${newPath}[${index}]`, paths);
-        });
-      } else if (typeof value === 'object' && value !== null) {
-        findJSONPaths(value, newPath, paths);
-      } else {
-        // Add the value path
-        paths.push(newPath);
+    if (Array.isArray(obj)) {
+      // Add wildcard path for arrays
+      if (currentPath) {
+        paths.push(`${currentPath}[]`);
       }
-    });
+      
+      obj.forEach((item, index) => {
+        findJSONPaths(item, `${currentPath}[${index}]`, paths);
+      });
+    } else {
+      Object.entries(obj).forEach(([key, value]) => {
+        const newPath = currentPath ? `${currentPath}.${key}` : key;
+        paths.push(newPath);
+        
+        if (Array.isArray(value)) {
+          paths.push(`${newPath}[]`);
+        } else if (typeof value === 'object' && value !== null) {
+          findJSONPaths(value, newPath, paths);
+        }
+      });
+    }
   } else {
     paths.push(currentPath);
   }
 
-  return [...new Set(paths)]; // Remove duplicates
+  return [...new Set(paths)];
+};
+
+export const searchJSONPaths = (obj: any, query: string): string[] => {
+  return findMatchingPaths(obj, query);
 };
 
 export const findXMLPaths = (xmlContent: string): string[] => {

@@ -20,6 +20,7 @@ interface JSONTabProps {
   onFormat: () => void;
   onContentChange: (content: string) => void;
   onTextSelect: (e: React.MouseEvent<HTMLTextAreaElement>) => void;
+  pathResult?: { values: any[]; path: string } | null;
 }
 
 const JSONTab: React.FC<JSONTabProps> = ({
@@ -37,6 +38,7 @@ const JSONTab: React.FC<JSONTabProps> = ({
   onFormat,
   onContentChange,
   onTextSelect,
+  pathResult,
 }) => {
   return (
     <div className="space-y-4">
@@ -49,6 +51,7 @@ const JSONTab: React.FC<JSONTabProps> = ({
         onExtractPath={onExtractPath}
         foundPaths={foundPaths}
         onPathSelect={onPathSelect}
+        pathResult={pathResult}
       />
 
       <div className="flex gap-2 mb-4">
