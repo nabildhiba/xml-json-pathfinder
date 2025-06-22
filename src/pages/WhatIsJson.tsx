@@ -1,11 +1,17 @@
-
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import HomeButton from '@/components/HomeButton';
 import { Link } from 'react-router-dom';
 
 const WhatIsJson = () => {
   return (
     <div className="min-h-screen bg-white relative">
+      <Helmet>
+        <title>What Is JSON? A Beginner-Friendly Introduction | JSONXMLKit</title>
+        <meta name="description" content="Learn the basics of JSON with simple examples and practical use cases. Understand JavaScript Object Notation and how it's used in web development." />
+        <link rel="canonical" href="https://jsonxmlkit.com/what-is-json" />
+      </Helmet>
+      
       <HomeButton />
       
       <div className="container max-w-4xl mx-auto px-4 py-16">

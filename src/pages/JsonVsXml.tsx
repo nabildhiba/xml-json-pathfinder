@@ -1,11 +1,17 @@
-
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import HomeButton from '@/components/HomeButton';
 import { Link } from 'react-router-dom';
 
 const JsonVsXml = () => {
   return (
     <div className="min-h-screen bg-white relative">
+      <Helmet>
+        <title>JSON vs XML: What's the Difference? (With Examples) | JSONXMLKit</title>
+        <meta name="description" content="Understand the differences between JSON and XML with practical examples and use cases. Compare syntax, performance, and learn which format to choose." />
+        <link rel="canonical" href="https://jsonxmlkit.com/json-vs-xml" />
+      </Helmet>
+      
       <HomeButton />
       
       <div className="container max-w-4xl mx-auto px-4 py-16">

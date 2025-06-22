@@ -1,11 +1,17 @@
-
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import HomeButton from '@/components/HomeButton';
 import { Link } from 'react-router-dom';
 
 const WhatIsXml = () => {
   return (
     <div className="min-h-screen bg-white relative">
+      <Helmet>
+        <title>What Is XML? Explained Simply With Examples | JSONXMLKit</title>
+        <meta name="description" content="Understand XML basics with beginner-friendly examples and learn where it's still used today. Learn about eXtensible Markup Language and its applications." />
+        <link rel="canonical" href="https://jsonxmlkit.com/what-is-xml" />
+      </Helmet>
+      
       <HomeButton />
       
       <div className="container max-w-4xl mx-auto px-4 py-16">

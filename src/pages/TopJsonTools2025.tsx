@@ -1,11 +1,17 @@
-
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import HomeButton from '@/components/HomeButton';
 import { Link } from 'react-router-dom';
 
 const TopJsonTools2025 = () => {
   return (
     <div className="min-h-screen bg-white relative">
+      <Helmet>
+        <title>Top 5 JSON Tools You Should Be Using in 2025 | JSONXMLKit</title>
+        <meta name="description" content="Discover the best free JSON tools available in 2025. Explore formatters, validators, converters and more for better JSON development workflow." />
+        <link rel="canonical" href="https://jsonxmlkit.com/top-json-tools-2025" />
+      </Helmet>
+      
       <HomeButton />
       
       <div className="container max-w-4xl mx-auto px-4 py-16">

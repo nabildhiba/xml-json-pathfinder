@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import CodeEditor from "@/components/CodeEditor";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +9,12 @@ import { FileJson, FileCode, RefreshCw, BookOpen } from "lucide-react";
 const Index = () => {
   return (
     <div className="container max-w-6xl mx-auto px-4">
+      <Helmet>
+        <title>Developer Tools for JSON, XML, and Base64 – All in One Place | JSONXMLKit</title>
+        <meta name="description" content="JSONXMLKit offers fast and privacy-friendly online tools to format and analyze JSON and XML data, extract values using path expressions, and encode/decode files with Base64." />
+        <link rel="canonical" href="https://jsonxmlkit.com/" />
+      </Helmet>
+      
       <div className="py-8">
         <h1 className="text-4xl font-bold text-center mb-4">
           Developer Tools for JSON, XML, and Base64 – All in One Place

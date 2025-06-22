@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import ToolsTabs from '@/components/tools/ToolsTabs';
 import { HelpCircle, ShieldQuestion, MessageCircleQuestion } from 'lucide-react';
 import HomeButton from '@/components/HomeButton';
@@ -239,6 +240,12 @@ const XMLTester = () => {
 
   return (
     <div className="container max-w-6xl mx-auto px-4 py-8 relative">
+      <Helmet>
+        <title>XML Formatter & XPath Tool | JSONXMLKit</title>
+        <meta name="description" content="Free online XML formatter and XPath tool. Beautify XML and extract values using XPath expressions." />
+        <link rel="canonical" href="https://jsonxmlkit.com/xpath-tester" />
+      </Helmet>
+      
       <HomeButton />
       <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
       <p className="text-center text-gray-600 mb-8">

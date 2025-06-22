@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Base64Tab from '@/components/tools/Base64Tab';
 import ToolsTabs from '@/components/tools/ToolsTabs';
@@ -83,6 +84,12 @@ const Base64Converter = () => {
 
   return (
     <div className="container py-4 animate-fade-in relative">
+      <Helmet>
+        <title>Base64 Encoder/Decoder Tool | JSONXMLKit</title>
+        <meta name="description" content="Free online Base64 encoder and decoder. Upload any file or paste content to encode or decode with Base64, supporting images, text, PDFs, and more." />
+        <link rel="canonical" href="https://jsonxmlkit.com/base64-encoder-decoder" />
+      </Helmet>
+      
       <HomeButton />
       <h1 className="text-3xl font-bold text-center mb-4">XML/JSON Path Finder & Base64 Converter - JSONXMLKit</h1>
       <p className="text-center text-gray-600 mb-8">
