@@ -28,6 +28,13 @@ const PathExtractionSection = ({
 }: PathExtractionSectionProps) => {
   console.log("PathExtractionSection render - hasSelection:", hasSelection, "selectedPath:", selectedPath);
   
+  const formatValue = (value: any): string => {
+    if (typeof value === 'object' && value !== null) {
+      return JSON.stringify(value, null, 2);
+    }
+    return typeof value === 'string' ? `"${value}"` : String(value);
+  };
+  
   return (
     <div className="space-y-4">
       <div className="p-4 border rounded-md bg-gray-50">
@@ -46,11 +53,24 @@ const PathExtractionSection = ({
         
         {pathResult && pathResult.values && pathResult.values.length > 0 && (
           <div className="mt-3 p-3 border rounded bg-blue-50">
-            <h4 className="font-medium text-sm mb-2">Path Results:</h4>
-            <div className="text-sm">
-              <code className="text-blue-800">
-                [{pathResult.values.map(v => typeof v === 'string' ? `"${v}"` : v).join(', ')}]
-              </code>
+            <h4 className="font-medium text-sm mb-2">Path Results ({pathResult.values.length} items):</h4>
+            <div className="text-sm max-h-64 overflow-y-auto">
+              {pathResult.values.length === 1 ? (
+                <pre className="text-blue-800 whitespace-pre-wrap bg-white p-2 rounded border">
+                  {formatValue(pathResult.values[0])}
+                </pre>
+              ) : (
+                <div className="space-y-2">
+                  {pathResult.values.map((value, index) => (
+                    <div key={index} className="bg-white p-2 rounded border">
+                      <div className="text-xs text-gray-500 mb-1">Item {index + 1}:</div>
+                      <pre className="text-blue-800 whitespace-pre-wrap text-xs">
+                        {formatValue(value)}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
