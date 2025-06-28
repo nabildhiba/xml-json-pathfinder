@@ -1,3 +1,4 @@
+
 export const formatXMLContent = (content: string): string => {
   try {
     const parser = new DOMParser();
@@ -186,38 +187,44 @@ export const downloadFile = (content: string, filename: string, isBinary = false
 };
 
 export const findJSONPaths = (obj: any, currentPath: string = '', paths: string[] = []): string[] => {
-  if (obj === null) {
-    paths.push(currentPath);
+  if (obj === null || obj === undefined) {
+    if (currentPath) paths.push(currentPath);
     return paths;
   }
 
   if (typeof obj === 'object') {
     if (Array.isArray(obj)) {
-      // Add wildcard path for arrays
+      // Add the array path itself
       if (currentPath) {
+        paths.push(currentPath);
         paths.push(`${currentPath}[]`);
       }
       
+      // Process each array item
       obj.forEach((item, index) => {
-        findJSONPaths(item, `${currentPath}[${index}]`, paths);
+        const itemPath = currentPath ? `${currentPath}[${index}]` : `[${index}]`;
+        findJSONPaths(item, itemPath, paths);
       });
     } else {
+      // Add the object path itself
+      if (currentPath) {
+        paths.push(currentPath);
+      }
+      
+      // Process each property
       Object.entries(obj).forEach(([key, value]) => {
         const newPath = currentPath ? `${currentPath}.${key}` : key;
-        paths.push(newPath);
-        
-        if (Array.isArray(value)) {
-          paths.push(`${newPath}[]`);
-        } else if (typeof value === 'object' && value !== null) {
-          findJSONPaths(value, newPath, paths);
-        }
+        findJSONPaths(value, newPath, paths);
       });
     }
   } else {
-    paths.push(currentPath);
+    // For primitive values, add the path
+    if (currentPath) {
+      paths.push(currentPath);
+    }
   }
 
-  return [...new Set(paths)];
+  return [...new Set(paths)].sort();
 };
 
 export const searchJSONPaths = (obj: any, query: string): string[] => {
