@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import ToolsTabs from './tools/ToolsTabs';
@@ -12,6 +11,7 @@ import {
   evaluateJSONPath,
   isModernPathSyntax
 } from '@/utils/formatters';
+import { findPathForSelectedText } from '@/utils/pathExtraction';
 
 declare global {
   interface Window {
@@ -240,11 +240,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         const paths = findJSONPaths(parsed);
         console.log("JSON paths found:", paths);
         
-        // Try multiple matching strategies
-        let matchingPath = paths.find(path => {
-          const pathValue = path.split('.').pop() || '';
-          return pathValue === selectedText || path.includes(selectedText);
-        });
+        // Use the improved path finding logic
+        const matchingPath = findPathForSelectedText(paths, selectedText);
         
         if (matchingPath) {
           setSelectedPath(matchingPath);
