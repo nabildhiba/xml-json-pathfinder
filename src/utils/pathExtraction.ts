@@ -1,6 +1,6 @@
 
 // Helper function to find matching paths by selected text
-export const findPathForSelectedText = (paths: string[], selectedText: string): string | null => {
+export const findPathForSelectedText = (paths: string[], selectedText: string, jsonData?: any): string | null => {
   const cleanText = selectedText.trim().toLowerCase();
   
   // Strategy 1: Direct property name match (exact match at end of path)
@@ -34,10 +34,52 @@ export const findPathForSelectedText = (paths: string[], selectedText: string): 
   
   if (matchingPath) return matchingPath;
   
-  // Strategy 4: Partial match anywhere in path
+  // Strategy 4: Search for actual values in the JSON data
+  if (jsonData) {
+    matchingPath = findPathByValue(jsonData, selectedText, paths);
+    if (matchingPath) return matchingPath;
+  }
+  
+  // Strategy 5: Partial match anywhere in path
   matchingPath = paths.find(path => 
     path.toLowerCase().includes(cleanText)
   );
   
   return matchingPath || null;
+};
+
+// Helper function to find path by actual value in JSON data
+const findPathByValue = (obj: any, searchValue: string, allPaths: string[]): string | null => {
+  const searchLower = searchValue.toLowerCase();
+  
+  const traverse = (current: any, currentPath: string = ''): string | null => {
+    if (current === null || current === undefined) {
+      return null;
+    }
+    
+    // Check if current value matches the search text
+    if (typeof current === 'string' && current.toLowerCase() === searchLower) {
+      return currentPath;
+    }
+    
+    if (typeof current === 'object') {
+      if (Array.isArray(current)) {
+        for (let i = 0; i < current.length; i++) {
+          const itemPath = currentPath ? `${currentPath}[${i}]` : `[${i}]`;
+          const result = traverse(current[i], itemPath);
+          if (result) return result;
+        }
+      } else {
+        for (const [key, value] of Object.entries(current)) {
+          const newPath = currentPath ? `${currentPath}.${key}` : key;
+          const result = traverse(value, newPath);
+          if (result) return result;
+        }
+      }
+    }
+    
+    return null;
+  };
+  
+  return traverse(obj);
 };
