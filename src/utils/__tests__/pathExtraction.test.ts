@@ -1,4 +1,5 @@
 
+import { describe, test, expect, beforeEach } from 'vitest';
 import { findJSONPaths } from '../formatters';
 import { findPathForSelectedText } from '../pathExtraction';
 
