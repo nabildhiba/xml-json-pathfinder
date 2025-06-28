@@ -240,8 +240,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({ defaultTab = 'xml', hideHeader 
         const paths = findJSONPaths(parsed);
         console.log("JSON paths found:", paths);
         
-        // Use the improved path finding logic
-        const matchingPath = findPathForSelectedText(paths, selectedText);
+        // Use the improved path finding logic with JSON data
+        const matchingPath = findPathForSelectedText(paths, selectedText, parsed);
         
         if (matchingPath) {
           setSelectedPath(matchingPath);

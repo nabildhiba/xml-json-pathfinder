@@ -10,7 +10,8 @@ import {
   encodeToBase64,
   decodeFromBase64,
   findJSONPaths,
-  findXMLPaths
+  findXMLPaths,
+  findPathForSelectedText
 } from '@/utils/formatters';
 
 const XMLTester = () => {
@@ -85,10 +86,8 @@ const XMLTester = () => {
         const paths = findJSONPaths(parsed);
         console.log("JSON paths found:", paths);
         
-        let matchingPath = paths.find(path => {
-          const pathValue = path.split('.').pop() || '';
-          return pathValue === selectedText || path.includes(selectedText);
-        });
+        // Use the improved path finding logic with JSON data
+        const matchingPath = findPathForSelectedText(paths, selectedText, parsed);
         
         if (matchingPath) {
           setSelectedPath(matchingPath);
