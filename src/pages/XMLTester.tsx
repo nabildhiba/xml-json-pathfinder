@@ -11,8 +11,8 @@ import {
   decodeFromBase64,
   findJSONPaths,
   findXMLPaths,
-  findPathForSelectedText
 } from '@/utils/formatters';
+import { findPathForSelectedText } from '@/utils/pathExtraction';
 
 const XMLTester = () => {
   const [xmlContent, setXMLContent] = useState('');
