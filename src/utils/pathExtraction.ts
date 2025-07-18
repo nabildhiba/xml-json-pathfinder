@@ -36,10 +36,8 @@ export const findPathForSelectedText = (
   matchingPath = paths.find(path => {
     const pathLower = path.toLowerCase();
     // Match patterns like "accounts[0].image.name" when searching for "name"
-    return pathLower.includes(`].${cleanText}`) || 
-           pathLower.includes(`[0].${cleanText}`) ||
-           pathLower.includes(`[1].${cleanText}`) ||
-           pathLower.includes(`[2].${cleanText}`);
+    const indexRegex = new RegExp(`\\[\\d+\\]\\.${cleanText.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}`);
+    return pathLower.includes(`].${cleanText}`) || indexRegex.test(pathLower);
   });
   
   if (matchingPath) return matchingPath;
