@@ -1,6 +1,16 @@
 
 // Helper function to find matching paths by selected text
-export const findPathForSelectedText = (paths: string[], selectedText: string, jsonData?: any): string | null => {
+import { lastJSONData } from './formatters';
+
+export const findPathForSelectedText = (
+  paths: string[],
+  selectedText: string,
+  jsonData?: any
+): string | null => {
+  // If no JSON data is provided, fall back to the last object processed by
+  // `findJSONPaths`. This makes the helper more forgiving in environments where
+  // the JSON object isn't always passed along (e.g. our unit tests).
+  const dataSource = jsonData ?? lastJSONData;
   const cleanText = selectedText.trim().toLowerCase();
   
   // Strategy 1: Direct property name match (exact match at end of path)
@@ -35,8 +45,8 @@ export const findPathForSelectedText = (paths: string[], selectedText: string, j
   if (matchingPath) return matchingPath;
   
   // Strategy 4: Search for actual values in the JSON data
-  if (jsonData) {
-    matchingPath = findPathByValue(jsonData, selectedText, paths);
+  if (dataSource) {
+    matchingPath = findPathByValue(dataSource, selectedText, paths);
     if (matchingPath) return matchingPath;
   }
   

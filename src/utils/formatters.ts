@@ -57,6 +57,11 @@ export const formatXMLContent = (content: string): string => {
 
 import { evaluateJSONPath, isModernPathSyntax, findMatchingPaths } from './jsonPathEvaluator';
 
+// Store the last JSON object processed by `findJSONPaths` so that other
+// utilities (like `findPathForSelectedText`) can access the data even when it
+// isn't explicitly provided again.
+export let lastJSONData: any = null;
+
 export { evaluateJSONPath, isModernPathSyntax };
 
 export const formatJSONContent = (content: string): string => {
@@ -187,6 +192,12 @@ export const downloadFile = (content: string, filename: string, isBinary = false
 };
 
 export const findJSONPaths = (obj: any, currentPath: string = '', paths: string[] = []): string[] => {
+  // Keep a reference to the most recently parsed JSON object. This allows
+  // helper utilities to access the JSON data even if it's not passed along
+  // explicitly (useful in tests and some UI interactions).
+  if (currentPath === '') {
+    lastJSONData = obj;
+  }
   if (obj === null || obj === undefined) {
     if (currentPath) paths.push(currentPath);
     return paths;
